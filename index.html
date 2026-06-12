@@ -1,873 +1,1366 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="pt-BR">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>XML → Excel Converter | Modern</title>
-    <style>
-        * {
-            margin: 0;
-            padding: 0;
-            box-sizing: border-box;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>NF-e Converter — XML → Excel</title>
+<script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.18.5/xlsx.full.min.js"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg:        #080b10;
+    --surface:   #0e1117;
+    --card:      #141820;
+    --card2:     #1a1f2e;
+    --border:    #1e2435;
+    --border2:   #252d40;
+    --accent:    #4f8ef7;
+    --accent2:   #7c6ff7;
+    --accent3:   #06b6d4;
+    --green:     #10b981;
+    --green2:    #059669;
+    --red:       #f43f5e;
+    --yellow:    #f59e0b;
+    --text:      #e2e8f0;
+    --text2:     #94a3b8;
+    --muted:     #475569;
+    --mono:      'JetBrains Mono', monospace;
+    --radius:    10px;
+    --radius-lg: 14px;
+  }
 
-        :root {
-            --primary: #6C63FF;
-            --primary-dark: #5A52D3;
-            --secondary: #FF6584;
-            --accent: #36D1DC;
-            --dark: #1A1A2E;
-            --light: #F8F9FA;
-            --success: #00C896;
-            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
-            --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, #FF9A9E 100%);
-        }
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        body {
-            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
-            background: var(--dark);
-            min-height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            padding: 20px;
-            color: var(--light);
-            overflow-x: hidden;
-        }
+  body {
+    font-family: 'Inter', sans-serif;
+    background: var(--bg);
+    color: var(--text);
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+  }
 
-        body::before {
-            content: '';
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: 
-                radial-gradient(circle at 20% 80%, rgba(108, 99, 255, 0.15) 0%, transparent 50%),
-                radial-gradient(circle at 80% 20%, rgba(255, 101, 132, 0.1) 0%, transparent 50%);
-            z-index: -1;
-        }
+  /* ── Header ── */
+  header {
+    padding: 0 32px;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    border-bottom: 1px solid var(--border);
+    background: var(--surface);
+    position: sticky;
+    top: 0;
+    z-index: 100;
+  }
+  .logo {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .logo-mark {
+    width: 30px;
+    height: 30px;
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    border-radius: 7px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    flex-shrink: 0;
+  }
+  .logo-text { font-size: 14px; font-weight: 600; letter-spacing: -0.3px; }
+  .logo-tag {
+    font-size: 11px;
+    font-weight: 500;
+    color: var(--text2);
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 5px;
+    padding: 2px 7px;
+    letter-spacing: 0.3px;
+  }
+  .header-divider {
+    flex: 1;
+  }
+  .header-hint {
+    font-size: 11px;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .header-dot {
+    width: 6px; height: 6px;
+    border-radius: 50%;
+    background: var(--green);
+    box-shadow: 0 0 6px var(--green);
+  }
 
-        .container {
-            width: 100%;
-            max-width: 900px;
-            background: rgba(26, 26, 46, 0.8);
-            backdrop-filter: blur(10px);
-            border-radius: 24px;
-            box-shadow: 
-                0 20px 60px rgba(0, 0, 0, 0.5),
-                0 0 0 1px rgba(108, 99, 255, 0.1);
-            overflow: hidden;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-            animation: containerAppear 0.8s cubic-bezier(0.23, 1, 0.32, 1);
-        }
+  /* ── Layout ── */
+  main {
+    flex: 1;
+    display: grid;
+    grid-template-columns: 300px 1fr;
+    min-height: calc(100vh - 56px);
+  }
 
-        @keyframes containerAppear {
-            0% { opacity: 0; transform: translateY(30px) scale(0.95); }
-            100% { opacity: 1; transform: translateY(0) scale(1); }
-        }
+  /* ── Sidebar ── */
+  aside {
+    background: var(--surface);
+    border-right: 1px solid var(--border);
+    padding: 24px 20px;
+    display: flex;
+    flex-direction: column;
+    gap: 20px;
+    overflow-y: auto;
+  }
 
-        .header {
-            background: var(--gradient);
-            padding: 50px 40px;
-            text-align: center;
-            position: relative;
-            overflow: hidden;
-        }
+  .section-label {
+    font-size: 9px;
+    font-weight: 700;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+  }
+  .section-label::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
 
-        .header::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
-            opacity: 0.2;
-        }
+  /* ── Dropzone ── */
+  .dropzone {
+    border: 1.5px dashed var(--border2);
+    border-radius: var(--radius-lg);
+    padding: 28px 16px 24px;
+    text-align: center;
+    cursor: pointer;
+    transition: border-color .2s, background .2s;
+    position: relative;
+    background: var(--card);
+  }
+  .dropzone:hover, .dropzone.drag-over {
+    border-color: var(--accent);
+    background: rgba(79,142,247,.05);
+  }
+  .dropzone input[type="file"] {
+    position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+  }
+  .dz-icon {
+    width: 44px; height: 44px;
+    background: linear-gradient(135deg, rgba(79,142,247,.15), rgba(124,111,247,.15));
+    border: 1px solid rgba(79,142,247,.2);
+    border-radius: 10px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 20px;
+    margin: 0 auto 14px;
+  }
+  .dropzone p.dz-main { font-size: 13px; font-weight: 500; color: var(--text); margin-bottom: 4px; }
+  .dropzone p.dz-sub { font-size: 11px; color: var(--muted); line-height: 1.5; }
+  .dz-types {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    margin-top: 14px;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted);
+  }
+  .dz-type-pill {
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text2);
+  }
 
-        .header-content {
-            position: relative;
-            z-index: 2;
-        }
+  /* ── File list ── */
+  .file-list { display: flex; flex-direction: column; gap: 5px; }
+  .file-item {
+    display: flex; align-items: center; gap: 9px;
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 10px;
+    font-size: 12px;
+    animation: fadeIn .2s ease;
+    transition: border-color .15s;
+  }
+  .file-item:hover { border-color: var(--border2); }
+  .fi-dot { width: 6px; height: 6px; border-radius: 2px; background: var(--accent); flex-shrink: 0; }
+  .fi-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; color: var(--text2); font-size: 11px; }
+  .fi-remove {
+    cursor: pointer; color: var(--muted); font-size: 14px; line-height: 1;
+    width: 18px; height: 18px; display: flex; align-items: center; justify-content: center;
+    border-radius: 4px;
+    transition: color .15s, background .15s;
+  }
+  .fi-remove:hover { color: var(--red); background: rgba(244,63,94,.1); }
 
-        .logo {
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            margin-bottom: 20px;
-        }
+  /* ── Progress ── */
+  .progress-wrap {
+    background: var(--card2);
+    border-radius: 3px;
+    overflow: hidden;
+    height: 3px;
+    margin-bottom: 6px;
+  }
+  .progress-bar {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent2));
+    border-radius: 3px;
+    transition: width .3s ease;
+  }
+  .progress-label { font-size: 11px; color: var(--text2); text-align: center; }
 
-        .logo-icon {
-            background: rgba(255, 255, 255, 0.2);
-            width: 70px;
-            height: 70px;
-            border-radius: 18px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            margin-right: 15px;
-            backdrop-filter: blur(5px);
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
+  /* ── Stats ── */
+  .stats-grid {
+    display: grid; grid-template-columns: 1fr 1fr;
+    gap: 8px;
+  }
+  .stat-card {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 12px 14px;
+    position: relative;
+    overflow: hidden;
+    transition: border-color .15s;
+  }
+  .stat-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0; right: 0;
+    height: 2px;
+  }
+  .stat-card.c-blue::before  { background: linear-gradient(90deg, var(--accent), var(--accent2)); }
+  .stat-card.c-green::before { background: linear-gradient(90deg, var(--green), var(--accent3)); }
+  .stat-card.c-red::before   { background: linear(90deg, var(--red), #fb7185); background: linear-gradient(90deg, var(--red), #fb7185); }
+  .stat-card.c-yellow::before{ background: linear-gradient(90deg, var(--yellow), #f97316); }
+  .stat-val {
+    font-family: var(--mono);
+    font-size: 22px;
+    font-weight: 500;
+    line-height: 1;
+    margin-bottom: 5px;
+  }
+  .stat-card.c-blue  .stat-val { color: var(--accent); }
+  .stat-card.c-green .stat-val { color: var(--green); }
+  .stat-card.c-red   .stat-val { color: var(--red); }
+  .stat-card.c-yellow .stat-val { color: var(--yellow); }
+  .stat-lbl { font-size: 10px; font-weight: 500; color: var(--muted); text-transform: uppercase; letter-spacing: .8px; }
 
-        .logo-icon i {
-            font-size: 32px;
-            color: white;
-        }
+  /* ── Buttons ── */
+  .btn {
+    display: flex; align-items: center; justify-content: center; gap: 8px;
+    padding: 10px 18px;
+    border: none; border-radius: var(--radius);
+    font-family: inherit; font-size: 13px; font-weight: 600;
+    cursor: pointer;
+    transition: filter .15s, opacity .15s, transform .1s;
+    width: 100%;
+    letter-spacing: -0.1px;
+  }
+  .btn:disabled { opacity: .35; cursor: not-allowed; }
+  .btn:not(:disabled):active { transform: scale(.98); }
+  .btn-icon { font-size: 15px; }
 
-        .logo-text h1 {
-            font-size: 2.8rem;
-            font-weight: 800;
-            background: linear-gradient(to right, #fff 0%, rgba(255, 255, 255, 0.9) 100%);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
+  .btn-primary {
+    background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+    color: #fff;
+    box-shadow: 0 1px 0 rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.1);
+  }
+  .btn-primary:not(:disabled):hover { filter: brightness(1.12); }
 
-        .logo-text p {
-            font-size: 1.1rem;
-            opacity: 0.9;
-            font-weight: 300;
-            margin-top: 5px;
-        }
+  .btn-success {
+    background: linear-gradient(135deg, var(--green) 0%, var(--green2) 100%);
+    color: #fff;
+    box-shadow: 0 1px 0 rgba(0,0,0,.3), inset 0 1px 0 rgba(255,255,255,.08);
+  }
+  .btn-success:not(:disabled):hover { filter: brightness(1.1); }
 
-        .content {
-            padding: 50px;
-        }
+  .btn-ghost {
+    background: var(--card2);
+    color: var(--text2);
+    border: 1px solid var(--border2);
+  }
+  .btn-ghost:not(:disabled):hover { background: var(--card); border-color: var(--border2); color: var(--text); }
 
-        .upload-card {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 20px;
-            padding: 40px;
-            border: 2px dashed rgba(108, 99, 255, 0.3);
-            transition: all 0.4s;
-            margin-bottom: 30px;
-        }
+  /* ── Content area ── */
+  .content {
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+    background: var(--bg);
+  }
 
-        .upload-card.active {
-            border-color: var(--primary);
-            background: rgba(108, 99, 255, 0.05);
-            transform: translateY(-5px);
-            box-shadow: 0 15px 30px rgba(108, 99, 255, 0.1);
-        }
+  /* ── Toolbar ── */
+  .toolbar {
+    padding: 14px 24px;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    flex-wrap: wrap;
+    background: var(--surface);
+  }
+  .toolbar-left { display: flex; align-items: center; gap: 10px; flex: 1; }
+  .toolbar-title { font-size: 13px; font-weight: 600; color: var(--text); }
+  .toolbar-count { font-size: 11px; color: var(--muted); font-family: var(--mono); }
 
-        .upload-label {
-            display: block;
-            font-size: 1.3rem;
-            margin-bottom: 25px;
-            color: var(--light);
-            text-align: center;
-            font-weight: 500;
-        }
+  .badge {
+    font-size: 10px; font-weight: 700;
+    padding: 3px 9px;
+    border-radius: 99px;
+    font-family: var(--mono);
+    letter-spacing: .3px;
+  }
+  .badge-blue   { background: rgba(79,142,247,.12);  color: #6ea8fb; }
+  .badge-green  { background: rgba(16,185,129,.12);  color: #34d399; }
+  .badge-yellow { background: rgba(245,158,11,.12);  color: #fbbf24; }
+  .badge-red    { background: rgba(244,63,94,.12);   color: #fb7185; }
 
-        .file-input-wrapper {
-            position: relative;
-            margin-bottom: 30px;
-        }
+  .search-wrap {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  .search-icon {
+    position: absolute;
+    left: 10px;
+    font-size: 12px;
+    color: var(--muted);
+    pointer-events: none;
+  }
+  .search-input {
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 10px 7px 30px;
+    color: var(--text);
+    font-family: inherit;
+    font-size: 12px;
+    width: 240px;
+    outline: none;
+    transition: border-color .15s, background .15s;
+  }
+  .search-input::placeholder { color: var(--muted); }
+  .search-input:focus { border-color: var(--accent); background: var(--card2); }
 
-        .file-input {
-            width: 100%;
-            height: 60px;
-            background: rgba(255, 255, 255, 0.05);
-            border: 2px solid rgba(255, 255, 255, 0.1);
-            border-radius: 15px;
-            padding: 0 20px;
-            font-size: 1rem;
-            color: var(--light);
-            transition: all 0.3s;
-            cursor: pointer;
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-        }
+  /* ── Filter tabs ── */
+  .filter-tabs {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+  }
+  .filter-tab {
+    font-size: 11px;
+    font-weight: 500;
+    padding: 5px 10px;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: all .15s;
+    border: 1px solid transparent;
+    color: var(--muted);
+    background: transparent;
+    font-family: inherit;
+  }
+  .filter-tab:hover { color: var(--text2); background: var(--card2); }
+  .filter-tab.active {
+    background: var(--card2);
+    border-color: var(--border2);
+    color: var(--text);
+  }
+  .filter-tab.active.t-all   { border-color: rgba(79,142,247,.4); color: var(--accent); }
+  .filter-tab.active.t-aut   { border-color: rgba(16,185,129,.4); color: var(--green); }
+  .filter-tab.active.t-can   { border-color: rgba(244,63,94,.4);  color: var(--red); }
+  .filter-tab.active.t-con   { border-color: rgba(245,158,11,.4); color: var(--yellow); }
 
-        .file-input:hover {
-            border-color: var(--primary);
-            background: rgba(108, 99, 255, 0.05);
-        }
+  /* ── Table ── */
+  .table-wrap {
+    flex: 1;
+    overflow: auto;
+  }
 
-        .file-input::file-selector-button {
-            background: var(--gradient);
-            color: white;
-            border: none;
-            padding: 12px 25px;
-            border-radius: 10px;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            margin-right: 15px;
-        }
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12px;
+    white-space: nowrap;
+  }
 
-        .file-input::file-selector-button:hover {
-            transform: translateY(-2px);
-            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.4);
-        }
+  thead th {
+    position: sticky; top: 0; z-index: 10;
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 9px 14px;
+    font-size: 10px;
+    font-weight: 600;
+    letter-spacing: .7px;
+    text-transform: uppercase;
+    color: var(--muted);
+    text-align: left;
+    cursor: pointer;
+    user-select: none;
+    transition: color .15s;
+    white-space: nowrap;
+  }
+  thead th:hover { color: var(--text2); }
+  thead th.sorted { color: var(--accent); }
+  .sort-arrow { margin-left: 4px; opacity: .5; font-size: 9px; }
+  thead th.sorted .sort-arrow { opacity: 1; }
 
-        .file-counter {
-            background: var(--gradient-secondary);
-            color: white;
-            padding: 8px 18px;
-            border-radius: 50px;
-            font-weight: 600;
-            font-size: 0.9rem;
-            display: inline-flex;
-            align-items: center;
-            gap: 8px;
-            margin-top: 15px;
-        }
+  tbody tr {
+    border-bottom: 1px solid rgba(30,36,53,.8);
+    transition: background .1s;
+  }
+  tbody tr:hover { background: rgba(255,255,255,.025); }
+  tbody tr:nth-child(even) { background: rgba(20,24,32,.5); }
+  tbody tr:nth-child(even):hover { background: rgba(255,255,255,.025); }
 
-        .progress-section {
-            margin: 30px 0;
-            display: none;
-        }
+  tbody td {
+    padding: 8px 14px;
+    color: var(--text);
+    max-width: 180px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  td.mono {
+    font-family: var(--mono);
+    font-size: 11px;
+    color: var(--text2);
+  }
+  td.right { text-align: right; }
 
-        .progress-header {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 10px;
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.7);
-        }
+  /* ── Situation badge ── */
+  .sit-badge {
+    display: inline-flex; align-items: center; gap: 5px;
+    font-size: 10px; font-weight: 700;
+    padding: 3px 8px; border-radius: 5px;
+    letter-spacing: .5px;
+    text-transform: uppercase;
+  }
+  .sit-dot { width: 4px; height: 4px; border-radius: 50%; flex-shrink: 0; }
+  .sit-aut  { background: rgba(16,185,129,.12);  color: #34d399; border: 1px solid rgba(16,185,129,.2); }
+  .sit-aut .sit-dot  { background: var(--green); box-shadow: 0 0 4px var(--green); }
+  .sit-can  { background: rgba(244,63,94,.12);   color: #fb7185; border: 1px solid rgba(244,63,94,.2); }
+  .sit-can .sit-dot  { background: var(--red); box-shadow: 0 0 4px var(--red); }
+  .sit-con  { background: rgba(245,158,11,.12);  color: #fbbf24; border: 1px solid rgba(245,158,11,.2); }
+  .sit-con .sit-dot  { background: var(--yellow); box-shadow: 0 0 4px var(--yellow); }
+  .sit-den  { background: rgba(71,85,105,.12);   color: #94a3b8; border: 1px solid rgba(71,85,105,.2); }
+  .sit-den .sit-dot  { background: var(--muted); }
 
-        .progress-bar {
-            height: 12px;
-            background: rgba(255, 255, 255, 0.05);
-            border-radius: 10px;
-            overflow: hidden;
-            position: relative;
-        }
+  /* ── Datas de vencimento ── */
+  .venc-pill {
+    display: inline-flex;
+    align-items: center;
+    gap: 4px;
+    background: rgba(6,182,212,.1);
+    border: 1px solid rgba(6,182,212,.2);
+    border-radius: 4px;
+    padding: 2px 7px;
+    font-size: 10px;
+    font-weight: 500;
+    color: #22d3ee;
+    font-family: var(--mono);
+    white-space: nowrap;
+    margin: 2px 2px 2px 0;
+  }
+  .venc-container {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 3px;
+    max-width: 280px;
+  }
+  .venc-count {
+    font-size: 9px;
+    font-weight: 700;
+    color: var(--muted);
+    padding: 2px 5px;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 4px;
+    font-family: var(--mono);
+  }
 
-        .progress-fill {
-            height: 100%;
-            background: var(--gradient);
-            border-radius: 10px;
-            width: 0%;
-            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
-            position: relative;
-            overflow: hidden;
-        }
+  /* ── Empty state ── */
+  .empty-state {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    padding: 80px 40px;
+    text-align: center;
+  }
+  .empty-icon {
+    width: 72px; height: 72px;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 32px;
+    margin-bottom: 4px;
+  }
+  .empty-state h3 { font-size: 16px; font-weight: 600; color: var(--text); }
+  .empty-state p {
+    font-size: 13px;
+    color: var(--muted);
+    max-width: 280px;
+    line-height: 1.7;
+  }
+  .empty-steps {
+    display: flex;
+    gap: 6px;
+    margin-top: 4px;
+  }
+  .empty-step {
+    display: flex;
+    align-items: center;
+    gap: 7px;
+    font-size: 11px;
+    color: var(--muted);
+    background: var(--card);
+    border: 1px solid var(--border);
+    border-radius: 7px;
+    padding: 8px 12px;
+  }
+  .empty-step-num {
+    width: 18px; height: 18px;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 50%;
+    font-size: 10px;
+    font-weight: 700;
+    color: var(--text2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
 
-        .progress-fill::after {
-            content: '';
-            position: absolute;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: linear-gradient(90deg, 
-                transparent 0%, 
-                rgba(255, 255, 255, 0.3) 50%, 
-                transparent 100%);
-            animation: shimmer 2s infinite;
-        }
+  /* ── Toast ── */
+  .toast {
+    position: fixed; bottom: 20px; right: 20px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    background: var(--card2);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 11px 16px;
+    font-size: 12px;
+    font-weight: 500;
+    box-shadow: 0 8px 32px rgba(0,0,0,.5);
+    animation: slideUp .25s ease;
+    z-index: 999;
+    max-width: 340px;
+  }
+  .toast-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--green);
+    flex-shrink: 0;
+  }
+  .toast.error .toast-dot { background: var(--red); }
 
-        @keyframes shimmer {
-            0% { transform: translateX(-100%); }
-            100% { transform: translateX(100%); }
-        }
+  /* ── Scrollbar ── */
+  ::-webkit-scrollbar { width: 5px; height: 5px; }
+  ::-webkit-scrollbar-track { background: transparent; }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+  ::-webkit-scrollbar-thumb:hover { background: var(--muted); }
 
-        .action-buttons {
-            display: flex;
-            gap: 20px;
-            justify-content: center;
-            margin-top: 30px;
-        }
+  /* ── Animations ── */
+  @keyframes fadeIn { from { opacity:0; transform:translateY(-3px); } to { opacity:1; transform:none; } }
+  @keyframes slideUp { from { opacity:0; transform:translateY(8px); } to { opacity:1; transform:none; } }
 
-        .btn {
-            padding: 18px 40px;
-            border: none;
-            border-radius: 15px;
-            font-size: 1.1rem;
-            font-weight: 600;
-            cursor: pointer;
-            transition: all 0.3s;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            gap: 12px;
-            min-width: 200px;
-        }
+  /* ── Bottom actions ── */
+  .sidebar-actions {
+    margin-top: auto;
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding-top: 16px;
+    border-top: 1px solid var(--border);
+  }
 
-        .btn-primary {
-            background: var(--gradient);
-            color: white;
-            box-shadow: 0 8px 25px rgba(108, 99, 255, 0.3);
-        }
-
-        .btn-primary:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(108, 99, 255, 0.4);
-        }
-
-        .btn-primary:active {
-            transform: translateY(-2px);
-        }
-
-        .btn-primary:disabled {
-            opacity: 0.6;
-            cursor: not-allowed;
-            transform: none !important;
-        }
-
-        .btn-secondary {
-            background: rgba(255, 255, 255, 0.05);
-            color: white;
-            border: 1px solid rgba(255, 255, 255, 0.1);
-        }
-
-        .btn-secondary:hover {
-            background: rgba(255, 255, 255, 0.1);
-            transform: translateY(-3px);
-        }
-
-        .result-section {
-            background: rgba(0, 200, 150, 0.05);
-            border-radius: 20px;
-            padding: 30px;
-            margin-top: 30px;
-            border: 1px solid rgba(0, 200, 150, 0.2);
-            display: none;
-            animation: slideUp 0.5s cubic-bezier(0.23, 1, 0.32, 1);
-        }
-
-        @keyframes slideUp {
-            from { opacity: 0; transform: translateY(20px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
-
-        .result-header {
-            display: flex;
-            align-items: center;
-            gap: 15px;
-            margin-bottom: 20px;
-        }
-
-        .result-icon {
-            width: 50px;
-            height: 50px;
-            background: var(--success);
-            border-radius: 12px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-        }
-
-        .result-icon i {
-            font-size: 24px;
-            color: white;
-        }
-
-        .result-content h3 {
-            font-size: 1.5rem;
-            font-weight: 600;
-            color: var(--success);
-            margin-bottom: 5px;
-        }
-
-        .result-content p {
-            color: rgba(255, 255, 255, 0.7);
-            font-size: 1rem;
-        }
-
-        .download-btn {
-            display: inline-flex;
-            align-items: center;
-            gap: 15px;
-            background: var(--gradient-secondary);
-            color: white;
-            text-decoration: none;
-            padding: 18px 35px;
-            border-radius: 15px;
-            font-weight: 600;
-            font-size: 1.1rem;
-            transition: all 0.3s;
-            box-shadow: 0 8px 25px rgba(255, 101, 132, 0.3);
-            margin-top: 15px;
-        }
-
-        .download-btn:hover {
-            transform: translateY(-5px);
-            box-shadow: 0 15px 35px rgba(255, 101, 132, 0.4);
-        }
-
-        .stats {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
-            gap: 20px;
-            margin-top: 30px;
-        }
-
-        .stat-card {
-            background: rgba(255, 255, 255, 0.03);
-            border-radius: 15px;
-            padding: 20px;
-            text-align: center;
-            border: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        .stat-value {
-            font-size: 2rem;
-            font-weight: 700;
-            background: var(--gradient);
-            -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
-            margin-bottom: 5px;
-        }
-
-        .stat-label {
-            font-size: 0.9rem;
-            color: rgba(255, 255, 255, 0.6);
-        }
-
-        .footer {
-            text-align: center;
-            padding: 30px;
-            color: rgba(255, 255, 255, 0.5);
-            font-size: 0.9rem;
-            border-top: 1px solid rgba(255, 255, 255, 0.05);
-        }
-
-        @media (max-width: 768px) {
-            .container {
-                max-width: 95%;
-            }
-            
-            .content {
-                padding: 30px 20px;
-            }
-            
-            .upload-card {
-                padding: 25px;
-            }
-            
-            .logo {
-                flex-direction: column;
-                text-align: center;
-            }
-            
-            .logo-icon {
-                margin-right: 0;
-                margin-bottom: 15px;
-            }
-            
-            .action-buttons {
-                flex-direction: column;
-            }
-            
-            .btn {
-                width: 100%;
-            }
-            
-            .header {
-                padding: 40px 20px;
-            }
-            
-            .logo-text h1 {
-                font-size: 2.2rem;
-            }
-        }
-    </style>
-    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+  /* ── Resize handle visual ── */
+  .stat-mini-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 8px;
+  }
+  .stat-mini-fill {
+    height: 100%;
+    border-radius: 99px;
+    transition: width .5s ease;
+  }
+  .c-blue  .stat-mini-fill { background: var(--accent); }
+  .c-green .stat-mini-fill { background: var(--green); }
+  .c-red   .stat-mini-fill { background: var(--red); }
+  .c-yellow .stat-mini-fill { background: var(--yellow); }
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="header">
-            <div class="header-content">
-                <div class="logo">
-                    <div class="logo-icon">
-                        <i class="fas fa-file-code"></i>
-                    </div>
-                    <div class="logo-text">
-                        <h1>XML → EXCEL CONVERTER</h1>
-                        <p>Transforme seus arquivos XML em planilhas Excel automaticamente</p>
-                    </div>
-                </div>
-            </div>
+
+<header>
+  <div class="logo">
+    <div class="logo-mark">📊</div>
+    <span class="logo-text">NF-e Converter</span>
+    <span class="logo-tag">XML → Excel</span>
+  </div>
+  <div class="header-divider"></div>
+  <div class="header-hint">
+    <span class="header-dot"></span>
+    NF-e modelo 55 · NFC-e modelo 65 · Eventos de cancelamento
+  </div>
+</header>
+
+<main>
+  <aside>
+
+    <div>
+      <div class="section-label">Upload</div>
+      <div class="dropzone" id="dropzone">
+        <input type="file" id="xml-input" multiple accept=".xml">
+        <div class="dz-icon">📂</div>
+        <p class="dz-main">Arraste XMLs aqui</p>
+        <p class="dz-sub">ou clique para selecionar</p>
+        <div class="dz-types">
+          <span class="dz-type-pill">.xml NF-e</span>
+          <span style="color:var(--muted)">+</span>
+          <span class="dz-type-pill">.xml Evento</span>
         </div>
-        
-        <div class="content">
-            <div class="upload-card" id="upload-card">
-                <label for="xml-files" class="upload-label">
-                    <i class="fas fa-file-import"></i> ARRASTE E SOLTE OU CLIQUE PARA SELECIONAR
-                </label>
-                
-                <div class="file-input-wrapper">
-                    <input type="file" id="xml-files" name="xml_files" multiple accept=".xml" class="file-input">
-                </div>
-                
-                <div id="file-counter" style="text-align: center;">
-                    <span class="file-counter">
-                        <i class="fas fa-file"></i> <span id="file-count">0</span> arquivo(s) selecionado(s)
-                    </span>
-                </div>
-                
-                <div class="progress-section" id="progress-section">
-                    <div class="progress-header">
-                        <span id="progress-text">Processando...</span>
-                        <span id="progress-percent">0%</span>
-                    </div>
-                    <div class="progress-bar">
-                        <div class="progress-fill" id="progress-fill"></div>
-                    </div>
-                </div>
-                
-                <div class="action-buttons">
-                    <button type="button" id="process-btn" class="btn btn-primary">
-                        <i class="fas fa-play-circle"></i> CONVERTER AGORA
-                    </button>
-                    <button type="button" id="reset-btn" class="btn btn-secondary">
-                        <i class="fas fa-redo"></i> LIMPAR TUDO
-                    </button>
-                </div>
-            </div>
-            
-            <div class="result-section" id="result-section">
-                <div class="result-header">
-                    <div class="result-icon">
-                        <i class="fas fa-check"></i>
-                    </div>
-                    <div class="result-content">
-                        <h3>Conversão Concluída!</h3>
-                        <p>Seu arquivo Excel está pronto para download</p>
-                    </div>
-                </div>
-                
-                <a id="download-link" class="download-btn" download="Arquivos XMLs.xlsx">
-                    <i class="fas fa-file-excel"></i> BAIXAR PLANILHA EXCEL
-                    <i class="fas fa-download"></i>
-                </a>
-                
-                <div class="stats">
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-files">0</div>
-                        <div class="stat-label">Arquivos Processados</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-rows">0</div>
-                        <div class="stat-label">Linhas de Dados</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-columns">0</div>
-                        <div class="stat-label">Colunas Geradas</div>
-                    </div>
-                    <div class="stat-card">
-                        <div class="stat-value" id="stat-time">0s</div>
-                        <div class="stat-label">Tempo de Processamento</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-        
-        <div class="footer">
-            <p>© 2025 XML → Excel Converter | Desenvolvido por Logistech </i></p>
-        </div>
+      </div>
     </div>
 
-    <script>
-        document.addEventListener('DOMContentLoaded', function() {
-            const fileInput = document.getElementById('xml-files');
-            const fileCount = document.getElementById('file-count');
-            const uploadCard = document.getElementById('upload-card');
-            const processBtn = document.getElementById('process-btn');
-            const resetBtn = document.getElementById('reset-btn');
-            const progressSection = document.getElementById('progress-section');
-            const progressFill = document.getElementById('progress-fill');
-            const progressText = document.getElementById('progress-text');
-            const progressPercent = document.getElementById('progress-percent');
-            const resultSection = document.getElementById('result-section');
-            const downloadLink = document.getElementById('download-link');
-            const statFiles = document.getElementById('stat-files');
-            const statRows = document.getElementById('stat-rows');
-            const statColumns = document.getElementById('stat-columns');
-            const statTime = document.getElementById('stat-time');
-            
-            let files = [];
-            let startTime = 0;
-            
-            // Atualizar contador de arquivos
-            fileInput.addEventListener('change', function() {
-                files = Array.from(this.files);
-                fileCount.textContent = files.length;
-                
-                if (files.length > 0) {
-                    uploadCard.classList.add('active');
-                } else {
-                    uploadCard.classList.remove('active');
-                }
-            });
-            
-            // Arrastar e soltar arquivos
-            uploadCard.addEventListener('dragover', function(e) {
-                e.preventDefault();
-                uploadCard.classList.add('active');
-            });
-            
-            uploadCard.addEventListener('dragleave', function(e) {
-                if (!uploadCard.contains(e.relatedTarget)) {
-                    uploadCard.classList.remove('active');
-                }
-            });
-            
-            uploadCard.addEventListener('drop', function(e) {
-                e.preventDefault();
-                uploadCard.classList.remove('active');
-                
-                if (e.dataTransfer.files.length) {
-                    fileInput.files = e.dataTransfer.files;
-                    files = Array.from(e.dataTransfer.files);
-                    fileCount.textContent = files.length;
-                    uploadCard.classList.add('active');
-                }
-            });
-            
-            // Botão de processar
-            processBtn.addEventListener('click', async function() {
-                if (files.length === 0) {
-                    showNotification('Selecione pelo menos um arquivo XML para converter', 'warning');
-                    return;
-                }
-                
-                // Iniciar processamento
-                startTime = Date.now();
-                progressSection.style.display = 'block';
-                resultSection.style.display = 'none';
-                processBtn.disabled = true;
-                processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> CONVERTENDO...';
-                
-                // Atualizar barra de progresso
-                updateProgress(10, 'Analisando arquivos...');
-                
-                try {
-                    const result = await processXMLFiles(files);
-                    
-                    // Atualizar estatísticas
-                    statFiles.textContent = files.length;
-                    statRows.textContent = result.rowCount;
-                    statColumns.textContent = result.columnCount;
-                    
-                    const timeElapsed = ((Date.now() - startTime) / 1000).toFixed(1);
-                    statTime.textContent = `${timeElapsed}s`;
-                    
-                    // Mostrar resultado
-                    updateProgress(100, 'Conversão concluída!');
-                    setTimeout(() => {
-                        progressSection.style.display = 'none';
-                        resultSection.style.display = 'block';
-                        processBtn.disabled = false;
-                        processBtn.innerHTML = '<i class="fas fa-play-circle"></i> CONVERTER AGORA';
-                        
-                        // Rolar para resultado
-                        resultSection.scrollIntoView({ behavior: 'smooth' });
-                    }, 500);
-                    
-                } catch (error) {
-                    showNotification('Erro ao processar arquivos: ' + error.message, 'error');
-                    progressSection.style.display = 'none';
-                    processBtn.disabled = false;
-                    processBtn.innerHTML = '<i class="fas fa-play-circle"></i> CONVERTER AGORA';
-                }
-            });
-            
-            // Botão de reset
-            resetBtn.addEventListener('click', function() {
-                fileInput.value = '';
-                files = [];
-                fileCount.textContent = '0';
-                uploadCard.classList.remove('active');
-                progressSection.style.display = 'none';
-                resultSection.style.display = 'none';
-                processBtn.disabled = false;
-                processBtn.innerHTML = '<i class="fas fa-play-circle"></i> CONVERTER AGORA';
-                showNotification('Todos os dados foram resetados', 'info');
-            });
-            
-            // Função para atualizar barra de progresso
-            function updateProgress(percent, text) {
-                progressFill.style.width = `${percent}%`;
-                progressPercent.textContent = `${percent}%`;
-                progressText.textContent = text;
-                
-                // Adicionar efeito de pulso no final
-                if (percent === 100) {
-                    progressFill.style.animation = 'pulse 1s infinite';
-                }
-            }
-            
-            // Função para mostrar notificação
-            function showNotification(message, type) {
-                // Criar elemento de notificação
-                const notification = document.createElement('div');
-                notification.className = `notification ${type}`;
-                notification.innerHTML = `
-                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
-                    <span>${message}</span>
-                `;
-                
-                // Estilos da notificação
-                notification.style.cssText = `
-                    position: fixed;
-                    top: 30px;
-                    right: 30px;
-                    background: ${type === 'success' ? 'rgba(0, 200, 150, 0.9)' : type === 'warning' ? 'rgba(255, 193, 7, 0.9)' : 'rgba(255, 101, 132, 0.9)'};
-                    color: white;
-                    padding: 15px 25px;
-                    border-radius: 12px;
-                    display: flex;
-                    align-items: center;
-                    gap: 12px;
-                    z-index: 1000;
-                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
-                    animation: slideIn 0.3s ease-out;
-                    font-weight: 500;
-                    backdrop-filter: blur(5px);
-                `;
-                
-                document.body.appendChild(notification);
-                
-                // Remover após 4 segundos
-                setTimeout(() => {
-                    notification.style.animation = 'slideOut 0.3s ease-out forwards';
-                    setTimeout(() => {
-                        if (notification.parentNode) {
-                            notification.parentNode.removeChild(notification);
-                        }
-                    }, 300);
-                }, 4000);
-                
-                // Adicionar keyframes para animação
-                if (!document.querySelector('#notification-styles')) {
-                    const style = document.createElement('style');
-                    style.id = 'notification-styles';
-                    style.textContent = `
-                        @keyframes slideIn {
-                            from { transform: translateX(100%); opacity: 0; }
-                            to { transform: translateX(0); opacity: 1; }
-                        }
-                        @keyframes slideOut {
-                            from { transform: translateX(0); opacity: 1; }
-                            to { transform: translateX(100%); opacity: 0; }
-                        }
-                        @keyframes pulse {
-                            0% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.7); }
-                            70% { box-shadow: 0 0 0 10px rgba(108, 99, 255, 0); }
-                            100% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0); }
-                        }
-                    `;
-                    document.head.appendChild(style);
-                }
-            }
-            
-            // Processar arquivos XML
-            async function processXMLFiles(files) {
-                let cabecalho = [];
-                let dados = [];
-                let rowCount = 0;
-                let columnCount = 0;
-                
-                updateProgress(20, 'Lendo arquivos XML...');
-                
-                // Processar cada arquivo
-                for (let i = 0; i < files.length; i++) {
-                    const file = files[i];
-                    const result = await readXMLFile(file);
-                    let dadosXML = extractDataElement(result);
-                    
-                    atualizarCabecalho(cabecalho, dadosXML);
-                    dados.push(dadosXML);
-                    rowCount++;
-                    
-                    // Atualizar progresso
-                    const progress = 20 + (i / files.length * 60);
-                    updateProgress(progress.toFixed(0), `Processando arquivo ${i+1} de ${files.length}...`);
-                    
-                    // Pequeno delay para visualização do progresso
-                    await new Promise(resolve => setTimeout(resolve, 100));
-                }
-                
-                columnCount = cabecalho.length;
-                updateProgress(85, 'Criando planilha Excel...');
-                
-                // Criar planilha Excel
-                let worksheet = XLSX.utils.json_to_sheet(dados, { header: cabecalho });
-                worksheet['!rows'] = [{}, ...dados.map(() => ({ hpt: 15 }))];
-                
-                let workbook = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(workbook, worksheet, "Dados XML");
-                
-                // Ajustar largura das colunas
-                var wscols = [];
-                for (var i = 0; i < cabecalho.length; i++) {
-                    wscols.push({ wpx: 150 });
-                }
-                worksheet['!cols'] = wscols;
-                
-                updateProgress(95, 'Gerando arquivo final...');
-                
-                // Escrever arquivo Excel
-                var wopts = { bookType: 'xlsx', bookSST: false, type: 'binary' };
-                var wbout = XLSX.write(workbook, wopts);
-                
-                // Converter para Blob
-                var s2ab = function (s) {
-                    var buf = new ArrayBuffer(s.length);
-                    var view = new Uint8Array(buf);
-                    for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
-                    return buf;
-                };
-                
-                // Criar URL de download
-                var blob = new Blob([s2ab(wbout)], { type: "application/octet-stream" });
-                var url = URL.createObjectURL(blob);
-                downloadLink.href = url;
-                
-                return {
-                    rowCount: dados.length,
-                    columnCount: cabecalho.length
-                };
-            }
-            
-            function readXMLFile(file) {
-                return new Promise((resolve, reject) => {
-                    let reader = new FileReader();
-                    reader.onload = () => {
-                        let parser = new DOMParser();
-                        let xmlDoc = parser.parseFromString(reader.result, "text/xml");
-                        resolve(xmlDoc.documentElement);
-                    };
-                    reader.onerror = reject;
-                    reader.readAsText(file);
-                });
-            }
-            
-            function extractDataElement(element) {
-                let dados = {};
-                Array.from(element.children).forEach(child => {
-                    if (child.children.length > 0) {
-                        Object.assign(dados, extractDataElement(child));
-                    } else {
-                        let tagLimpa = child.tagName.replace(/{.*}/, '');
-                        dados[tagLimpa] = child.textContent;
-                    }
-                });
-                return dados;
-            }
-            
-            function atualizarCabecalho(cabecalho, dadosXML) {
-                Object.keys(dadosXML).forEach(chave => {
-                    if (!cabecalho.includes(chave)) {
-                        cabecalho.push(chave);
-                    }
-                });
-            }
-            
-            // Mostrar mensagem de boas-vindas
-            setTimeout(() => {
-                showNotification('Bem-vindo ao conversor XML → Excel! Arraste seus arquivos para começar.', 'info');
-            }, 1000);
-        });
-    </script>
+    <div id="file-list-wrap" style="display:none">
+      <div class="section-label">Carregados</div>
+      <div class="file-list" id="file-list"></div>
+    </div>
+
+    <div id="progress-section" style="display:none">
+      <div class="section-label">Processando</div>
+      <div class="progress-wrap">
+        <div class="progress-bar" id="progress-bar" style="width:0%"></div>
+      </div>
+      <p class="progress-label" id="progress-label">Aguarde...</p>
+    </div>
+
+    <div id="stats-section" style="display:none">
+      <div class="section-label">Resumo</div>
+      <div class="stats-grid">
+        <div class="stat-card c-blue">
+          <div class="stat-val" id="st-total">0</div>
+          <div class="stat-lbl">Notas</div>
+          <div class="stat-mini-bar"><div class="stat-mini-fill" id="bar-total" style="width:100%"></div></div>
+        </div>
+        <div class="stat-card c-green">
+          <div class="stat-val" id="st-aut">0</div>
+          <div class="stat-lbl">Autorizadas</div>
+          <div class="stat-mini-bar"><div class="stat-mini-fill" id="bar-aut" style="width:0%"></div></div>
+        </div>
+        <div class="stat-card c-red">
+          <div class="stat-val" id="st-can">0</div>
+          <div class="stat-lbl">Canceladas</div>
+          <div class="stat-mini-bar"><div class="stat-mini-fill" id="bar-can" style="width:0%"></div></div>
+        </div>
+        <div class="stat-card c-yellow">
+          <div class="stat-val" id="st-con">0</div>
+          <div class="stat-lbl">Contingência</div>
+          <div class="stat-mini-bar"><div class="stat-mini-fill" id="bar-con" style="width:0%"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sidebar-actions">
+      <button class="btn btn-primary" id="btn-process" disabled>
+        <span class="btn-icon">⚙️</span> Processar XMLs
+      </button>
+      <button class="btn btn-success" id="btn-export" disabled>
+        <span class="btn-icon">⬇️</span> Exportar Excel
+      </button>
+      <button class="btn btn-ghost" id="btn-clear" style="display:none">
+        <span class="btn-icon">🗑</span> Limpar tudo
+      </button>
+    </div>
+
+  </aside>
+
+  <div class="content" id="content-area">
+
+    <div class="empty-state" id="empty-state">
+      <div class="empty-icon">🗂️</div>
+      <h3>Nenhuma nota carregada</h3>
+      <p>Selecione arquivos XML de NF-e (modelo 55), NFC-e (modelo 65) ou eventos de cancelamento para começar.</p>
+      <div class="empty-steps">
+        <div class="empty-step"><span class="empty-step-num">1</span> Selecione XMLs</div>
+        <div class="empty-step"><span class="empty-step-num">2</span> Processe</div>
+        <div class="empty-step"><span class="empty-step-num">3</span> Exporte</div>
+      </div>
+    </div>
+
+    <div id="table-view" style="display:none; flex-direction:column; height:100%;">
+      <div class="toolbar">
+        <div class="toolbar-left">
+          <span class="toolbar-title">Notas Fiscais</span>
+          <span class="toolbar-count" id="toolbar-count">—</span>
+          <div class="filter-tabs" id="filter-tabs">
+            <button class="filter-tab t-all active" data-filter="all">Todas</button>
+            <button class="filter-tab t-aut" data-filter="autorizada">Autorizadas</button>
+            <button class="filter-tab t-can" data-filter="cancelada">Canceladas</button>
+            <button class="filter-tab t-con" data-filter="contingencia">Contingência</button>
+          </div>
+        </div>
+        <div class="search-wrap">
+          <span class="search-icon">🔍</span>
+          <input type="text" class="search-input" id="search-input" placeholder="NF, CNPJ, produto, chave...">
+        </div>
+      </div>
+      <div class="table-wrap">
+        <table id="data-table">
+          <thead id="table-head"></thead>
+          <tbody id="table-body"></tbody>
+        </table>
+      </div>
+    </div>
+
+  </div>
+</main>
+
+<script>
+// ─── Estado global ──────────────────────────────────────────────────────────
+let loadedFiles = [];
+let parsedRows = [];
+let eventosMap = new Map();
+let activeFilter = 'all';
+
+// ─── Column definitions ────────────────────────────────────────────────────
+const COLUMNS = [
+  { key: 'situacao',      label: 'Situação',         fmt: 'situacao' },
+  { key: 'nNF',           label: 'Nº NF',            fmt: 'mono' },
+  { key: 'serie',         label: 'Série',            fmt: 'mono' },
+  { key: 'dhEmi',         label: 'Emissão',          fmt: 'date' },
+  { key: 'natOp',         label: 'Natureza Op.',     fmt: null },
+  { key: 'emitNome',      label: 'Emitente',         fmt: null },
+  { key: 'emitCNPJ',      label: 'CNPJ Emitente',    fmt: 'mono' },
+  { key: 'emitMun',       label: 'Cidade Emitente',  fmt: null },
+  { key: 'emitUF',        label: 'UF Emit.',         fmt: null },
+  { key: 'destNome',      label: 'Destinatário',     fmt: null },
+  { key: 'destCNPJCPF',   label: 'CNPJ/CPF Dest.',   fmt: 'mono' },
+  { key: 'destMun',       label: 'Cidade Dest.',     fmt: null },
+  { key: 'destUF',        label: 'UF Dest.',         fmt: null },
+  { key: 'nItem',         label: 'Nº Item',          fmt: 'mono' },
+  { key: 'cProd',         label: 'Cód. Produto',     fmt: 'mono' },
+  { key: 'cEAN',          label: 'Cód. Barras',      fmt: 'mono' },
+  { key: 'xProd',         label: 'Produto',          fmt: null },
+  { key: 'NCM',           label: 'NCM',              fmt: 'mono' },
+  { key: 'CFOP',          label: 'CFOP',             fmt: 'mono' },
+  { key: 'qCom',          label: 'Qtd.',             fmt: null },
+  { key: 'uCom',          label: 'Unid.',            fmt: null },
+  { key: 'vUnCom',        label: 'Vl. Unit.',        fmt: 'money' },
+  { key: 'vProd',         label: 'Vl. Produto',      fmt: 'money' },
+  { key: 'vDesc',         label: 'Desc.',            fmt: 'money' },
+  { key: 'vItem',         label: 'Vl. Item',         fmt: 'money' },
+  { key: 'cstICMS',       label: 'CST ICMS',         fmt: 'mono' },
+  { key: 'vBCICMS',       label: 'BC ICMS',          fmt: 'money' },
+  { key: 'pICMS',         label: 'Alíq. ICMS %',     fmt: null },
+  { key: 'vICMS',         label: 'Vl. ICMS',         fmt: 'money' },
+  { key: 'vBCSTRet',      label: 'BC ICMS-ST Ret.',  fmt: 'money' },
+  { key: 'vICMSSTRet',    label: 'ICMS-ST Ret.',     fmt: 'money' },
+  { key: 'cstPIS',        label: 'CST PIS',          fmt: 'mono' },
+  { key: 'vPIS',          label: 'Vl. PIS',          fmt: 'money' },
+  { key: 'cstCOFINS',     label: 'CST COFINS',       fmt: 'mono' },
+  { key: 'vCOFINS',       label: 'Vl. COFINS',       fmt: 'money' },
+  { key: 'cClassTrib',    label: 'cClassTrib',       fmt: 'mono' },
+  { key: 'cstIBSCBS',     label: 'CST IBS/CBS',      fmt: 'mono' },
+  { key: 'vBCIBSCBS',     label: 'BC IBS/CBS',       fmt: 'money' },
+  { key: 'pIBSUF',        label: 'Alíq. IBS-UF %',   fmt: null },
+  { key: 'vIBSUF',        label: 'Vl. IBS-UF',       fmt: 'money' },
+  { key: 'pIBSMun',       label: 'Alíq. IBS-Mun %',  fmt: null },
+  { key: 'vIBSMun',       label: 'Vl. IBS-Mun',      fmt: 'money' },
+  { key: 'pCBS',          label: 'Alíq. CBS %',      fmt: null },
+  { key: 'vCBS',          label: 'Vl. CBS',          fmt: 'money' },
+  { key: 'vNF',           label: 'Vl. NF',           fmt: 'money' },
+  { key: 'vNFTot',        label: 'Vl. Total',        fmt: 'money' },
+  { key: 'tPag',          label: 'Tipo Pgto.',       fmt: null },
+  { key: 'xPag',          label: 'Desc. Pgto.',      fmt: null },
+  { key: 'vPag',          label: 'Vl. Pgto.',        fmt: 'money' },
+  { key: 'indPag',        label: 'Ind. Pgto.',       fmt: 'indpag' },
+  { key: 'chNFe',         label: 'Chave NF-e',       fmt: 'mono' },
+  { key: 'nProt',         label: 'Protocolo',        fmt: 'mono' },
+  { key: 'infCpl',        label: 'Inf. Complementar',fmt: null },
+  { key: 'dVenc',         label: 'Vencimento(s)',     fmt: 'vencimento' }
+];
+
+const PAG_LABELS = {
+  '01':'Dinheiro','02':'Cheque','03':'Cartão Crédito','04':'Cartão Débito',
+  '05':'Crédito Loja','10':'Vale Alimentação','11':'Vale Refeição','12':'Vale Presente',
+  '13':'Vale Combustível','14':'Duplicata Mercantil','15':'Boleto','16':'Dep. Bancário',
+  '17':'Pix','90':'Sem Pgto.','99':'Outros'
+};
+const IND_PAG = {'0':'À Vista','1':'A Prazo'};
+
+// ─── Helpers XML ─────────────────────────────────────────────────────────────
+function g(parent, tag, ns = 'http://www.portalfiscal.inf.br/nfe') {
+  if (!parent) return '';
+  let el = parent.getElementsByTagNameNS(ns, tag)[0];
+  if (!el) el = parent.getElementsByTagName(tag)[0];
+  return el ? el.textContent.trim() : '';
+}
+
+// ─── Parsing NF-e — suporte a MÚLTIPLAS duplicatas ──────────────────────────
+function parseNFe(xmlDoc, fileName) {
+  const ns = 'http://www.portalfiscal.inf.br/nfe';
+  let situacao = 'autorizada';
+
+  const prot = xmlDoc.getElementsByTagNameNS(ns, 'infProt')[0] || xmlDoc.getElementsByTagName('infProt')[0];
+  if (prot) {
+    const s = parseInt(g(prot, 'cStat', ns), 10);
+    if (s === 100 || s === 150)        situacao = 'autorizada';
+    else if (s === 101 || s === 151)   situacao = 'cancelada';
+    else if ([107,108,109].includes(s)) situacao = 'denegada';
+    else                               situacao = 'contingencia';
+  }
+
+  const infNFe = xmlDoc.getElementsByTagNameNS(ns, 'infNFe')[0] || xmlDoc.getElementsByTagName('infNFe')[0];
+  if (!infNFe) return null;
+
+  const ide  = infNFe.getElementsByTagNameNS(ns, 'ide')[0]  || infNFe.getElementsByTagName('ide')[0];
+  const emit = infNFe.getElementsByTagNameNS(ns, 'emit')[0] || infNFe.getElementsByTagName('emit')[0];
+  const dest = infNFe.getElementsByTagNameNS(ns, 'dest')[0] || infNFe.getElementsByTagName('dest')[0];
+
+  const tpAmb  = g(ide, 'tpAmb', ns);
+  const tpEmis = g(ide, 'tpEmis', ns);
+  if (tpAmb  === '2')                   situacao = 'homologacao';
+  if (tpEmis !== '1' && tpEmis !== '')  situacao = 'contingencia';
+
+  // ── Extrair TODAS as duplicatas (datas de vencimento) ─────────────────────
+  // Suporta NF-e modelo 55 e NFC-e modelo 65
+  const dVencDatas = [];
+  const cobr = infNFe.getElementsByTagNameNS(ns, 'cobr')[0] || infNFe.getElementsByTagName('cobr')[0];
+  if (cobr) {
+    const dups = cobr.getElementsByTagNameNS(ns, 'dup');
+    const dupsAlt = dups.length ? dups : cobr.getElementsByTagName('dup');
+    for (let di = 0; di < dupsAlt.length; di++) {
+      const dvDate = g(dupsAlt[di], 'dVenc', ns);
+      const dvVal  = g(dupsAlt[di], 'vDup', ns);
+      if (dvDate) {
+        dVencDatas.push({ data: dvDate, valor: dvVal });
+      }
+    }
+  }
+
+  // dVenc para exportação: string separada por " | "
+  const dVencStr = dVencDatas.map(d => {
+    try {
+      const dt = new Date(d.data);
+      if (!isNaN(dt)) {
+        return dt.toLocaleDateString('pt-BR') + (d.valor ? ' (R$' + parseFloat(d.valor).toLocaleString('pt-BR',{minimumFractionDigits:2,maximumFractionDigits:2}) + ')' : '');
+      }
+    } catch {}
+    return d.data;
+  }).join(' | ');
+
+  // ── Itens ─────────────────────────────────────────────────────────────────
+  const dets = infNFe.getElementsByTagNameNS(ns, 'det');
+  const rows = [];
+
+  for (let d = 0; d < (dets.length || 1); d++) {
+    const det = dets[d];
+    const nItem = det ? (det.getAttribute('nItem') || (d+1).toString()) : '1';
+
+    const prod = det ? (det.getElementsByTagNameNS(ns,'prod')[0] || det.getElementsByTagName('prod')[0]) : null;
+    const imp  = det ? (det.getElementsByTagNameNS(ns,'imposto')[0] || det.getElementsByTagName('imposto')[0]) : null;
+
+    let cstICMS='', vBCICMS='', pICMS='', vICMS='', vBCSTRet='', vICMSSTRet='';
+    if (imp) {
+      const icmsNode = imp.getElementsByTagNameNS(ns,'ICMS')[0] || imp.getElementsByTagName('ICMS')[0];
+      if (icmsNode && icmsNode.children[0]) {
+        const x = icmsNode.children[0];
+        cstICMS = g(x,'CST',ns) || g(x,'CSOSN',ns);
+        vBCICMS = g(x,'vBC',ns); pICMS = g(x,'pICMS',ns); vICMS = g(x,'vICMS',ns);
+        vBCSTRet = g(x,'vBCSTRet',ns); vICMSSTRet = g(x,'vICMSSTRet',ns);
+      }
+    }
+
+    let cstPIS='', vPIS='';
+    if (imp) {
+      const pisNode = imp.getElementsByTagNameNS(ns,'PIS')[0] || imp.getElementsByTagName('PIS')[0];
+      if (pisNode && pisNode.children[0]) {
+        const x = pisNode.children[0];
+        cstPIS = g(x,'CST',ns); vPIS = g(x,'vPIS',ns);
+      }
+    }
+
+    let cstCOFINS='', vCOFINS='';
+    if (imp) {
+      const cofNode = imp.getElementsByTagNameNS(ns,'COFINS')[0] || imp.getElementsByTagName('COFINS')[0];
+      if (cofNode && cofNode.children[0]) {
+        const x = cofNode.children[0];
+        cstCOFINS = g(x,'CST',ns); vCOFINS = g(x,'vCOFINS',ns);
+      }
+    }
+
+    let cClassTrib='', cstIBSCBS='', vBCIBSCBS='', pIBSUF='', vIBSUF='', pIBSMun='', vIBSMun='', pCBS='', vCBS='';
+    if (imp) {
+      const ibsNode = imp.getElementsByTagNameNS(ns,'IBSCBS')[0] || imp.getElementsByTagName('IBSCBS')[0];
+      if (ibsNode) {
+        cstIBSCBS = g(ibsNode,'CST',ns); cClassTrib = g(ibsNode,'cClassTrib',ns);
+        const gIBS = ibsNode.getElementsByTagNameNS(ns,'gIBSCBS')[0] || ibsNode.getElementsByTagName('gIBSCBS')[0];
+        if (gIBS) {
+          vBCIBSCBS=g(gIBS,'vBC',ns); pIBSUF=g(gIBS,'pIBSUF',ns); vIBSUF=g(gIBS,'vIBSUF',ns);
+          pIBSMun=g(gIBS,'pIBSMun',ns); vIBSMun=g(gIBS,'vIBSMun',ns); pCBS=g(gIBS,'pCBS',ns); vCBS=g(gIBS,'vCBS',ns);
+        }
+      }
+    }
+
+    const detPag   = infNFe.getElementsByTagNameNS(ns,'detPag')[0] || infNFe.getElementsByTagName('detPag')[0];
+    const tPagCode = detPag ? g(detPag,'tPag',ns) : '';
+    const xPag     = detPag ? (g(detPag,'xPag',ns) || PAG_LABELS[tPagCode] || tPagCode) : '';
+    const vPag     = detPag ? g(detPag,'vPag',ns) : '';
+    const indPag   = detPag ? g(detPag,'indPag',ns) : '';
+    const totNode  = infNFe.getElementsByTagNameNS(ns,'total')[0] || infNFe.getElementsByTagName('total')[0];
+
+    rows.push({
+      situacao,
+      nNF: g(ide,'nNF',ns), serie: g(ide,'serie',ns), dhEmi: g(ide,'dhEmi',ns), natOp: g(ide,'natOp',ns),
+      emitNome: g(emit,'xNome',ns), emitCNPJ: g(emit,'CNPJ',ns),
+      emitMun: emit ? g(emit.getElementsByTagNameNS(ns,'enderEmit')[0]||emit,'xMun',ns) : '',
+      emitUF:  emit ? g(emit.getElementsByTagNameNS(ns,'enderEmit')[0]||emit,'UF',ns)  : '',
+      destNome: dest ? g(dest,'xNome',ns) : '',
+      destCNPJCPF: dest ? (g(dest,'CNPJ',ns)||g(dest,'CPF',ns)) : '',
+      destMun: dest ? g(dest.getElementsByTagNameNS(ns,'enderDest')[0]||dest,'xMun',ns) : '',
+      destUF:  dest ? g(dest.getElementsByTagNameNS(ns,'enderDest')[0]||dest,'UF',ns)  : '',
+      nItem,
+      cProd: prod?g(prod,'cProd',ns):'', cEAN: prod?g(prod,'cEAN',ns):'',
+      xProd: prod?g(prod,'xProd',ns):'', NCM:  prod?g(prod,'NCM',ns):'',
+      CFOP:  prod?g(prod,'CFOP',ns):'',  qCom: prod?g(prod,'qCom',ns):'',
+      uCom:  prod?g(prod,'uCom',ns):'',  vUnCom: prod?g(prod,'vUnCom',ns):'',
+      vProd: prod?g(prod,'vProd',ns):'', vDesc:  prod?g(prod,'vDesc',ns):'',
+      vItem: det?g(det,'vItem',ns):'',
+      cstICMS, vBCICMS, pICMS, vICMS, vBCSTRet, vICMSSTRet,
+      cstPIS, vPIS, cstCOFINS, vCOFINS,
+      cClassTrib, cstIBSCBS, vBCIBSCBS, pIBSUF, vIBSUF, pIBSMun, vIBSMun, pCBS, vCBS,
+      vNF:    totNode?g(totNode,'vNF',ns):'',
+      vNFTot: totNode?g(totNode,'vNFTot',ns):'',
+      tPag: PAG_LABELS[tPagCode]||tPagCode, xPag, vPag,
+      indPag: IND_PAG[indPag]||indPag,
+      chNFe: prot?g(prot,'chNFe',ns):'', nProt: prot?g(prot,'nProt',ns):'',
+      infCpl: g(infNFe.getElementsByTagNameNS(ns,'infAdic')[0]||infNFe,'infCpl',ns),
+      dVenc: dVencStr,
+      _dVencArray: dVencDatas,   // array interno para renderização visual
+      _file: fileName,
+    });
+  }
+  return rows;
+}
+
+// ─── Parsing evento de cancelamento ─────────────────────────────────────────
+function parseEventoCancelamento(xmlDoc) {
+  const ns = 'http://www.portalfiscal.inf.br/nfe';
+  const evento = xmlDoc.getElementsByTagNameNS(ns,'evento')[0] || xmlDoc.getElementsByTagName('evento')[0];
+  if (!evento) return null;
+  const infEvento = evento.getElementsByTagNameNS(ns,'infEvento')[0] || evento.getElementsByTagName('infEvento')[0];
+  if (!infEvento) return null;
+  if (g(infEvento,'tpEvento',ns) !== '110111') return null;
+  const chNFe = g(infEvento,'chNFe',ns);
+  if (!chNFe) return null;
+  const retEvento = xmlDoc.getElementsByTagNameNS(ns,'retEvento')[0] || xmlDoc.getElementsByTagName('retEvento')[0];
+  if (!retEvento) return null;
+  if (g(retEvento,'cStat',ns) !== '135') return null;
+  return { chNFe, tipo: 'cancelamento', nProt: g(retEvento,'nProt',ns) };
+}
+
+// ─── Aplicar eventos ─────────────────────────────────────────────────────────
+function aplicarEventos(rows, eventosMap) {
+  for (const row of rows) {
+    const ev = eventosMap.get(row.chNFe);
+    if (ev && ev.tipo === 'cancelamento') {
+      row.situacao = 'cancelada';
+      if (ev.nProt) row.nProt = ev.nProt;
+    }
+  }
+  return rows;
+}
+
+// ─── Formatação ──────────────────────────────────────────────────────────────
+function fmtDate(str) {
+  if (!str) return '';
+  try {
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return str;
+    return d.toLocaleString('pt-BR', { dateStyle: 'short', timeStyle: 'short' });
+  } catch { return str; }
+}
+
+function fmtDateOnly(str) {
+  if (!str) return '';
+  try {
+    const d = new Date(str);
+    if (isNaN(d.getTime())) return str;
+    return d.toLocaleDateString('pt-BR');
+  } catch { return str; }
+}
+
+function fmtMoney(v) {
+  if (v === '' || v == null) return '';
+  const n = parseFloat(v);
+  return isNaN(n) ? v : n.toLocaleString('pt-BR', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+}
+
+function situacaoBadge(s) {
+  const map = {
+    autorizada:   ['sit-aut', 'Autorizada'],
+    cancelada:    ['sit-can', 'Cancelada'],
+    contingencia: ['sit-con', 'Contingência'],
+    denegada:     ['sit-den', 'Denegada'],
+    homologacao:  ['sit-den', 'Homologação'],
+  };
+  const [cls, lbl] = map[s] || ['sit-den', s];
+  return `<span class="sit-badge ${cls}"><span class="sit-dot"></span>${lbl}</span>`;
+}
+
+function vencimentoCell(row) {
+  const arr = row._dVencArray || [];
+  if (!arr.length) {
+    // fallback para campo dVenc legacy (string)
+    if (row.dVenc) {
+      return `<div class="venc-container"><span class="venc-pill">${row.dVenc}</span></div>`;
+    }
+    return '<span style="color:var(--muted);font-size:11px;">—</span>';
+  }
+  const pills = arr.map(d => {
+    const dt = fmtDateOnly(d.data);
+    const vl = d.valor ? ` · R$${fmtMoney(d.valor)}` : '';
+    return `<span class="venc-pill" title="${d.data}${vl}">${dt}</span>`;
+  });
+  const html = `<div class="venc-container">${pills.join('')}`;
+  if (arr.length > 1) {
+    return html + `<span class="venc-count">${arr.length}x</span></div>`;
+  }
+  return html + `</div>`;
+}
+
+function cellContent(col, val, row) {
+  if (col.fmt === 'situacao')   return situacaoBadge(val);
+  if (col.fmt === 'money')      return `<span style="color:var(--text2)">${fmtMoney(val)}</span>`;
+  if (col.fmt === 'date')       return fmtDate(val);
+  if (col.fmt === 'vencimento') return vencimentoCell(row);
+  if (col.fmt === 'indpag')     return val;
+  return val || '<span style="color:var(--muted)">—</span>';
+}
+
+// ─── Sort ────────────────────────────────────────────────────────────────────
+let sortState = { col: null, asc: true };
+
+function renderTable(rows) {
+  const thead = document.getElementById('table-head');
+  const tbody = document.getElementById('table-body');
+
+  thead.innerHTML = '<tr>' + COLUMNS.map((c, i) => {
+    const sorted = sortState.col === i;
+    return `<th data-col="${i}" class="${sorted ? 'sorted' : ''}">
+      ${c.label}<span class="sort-arrow">${sorted ? (sortState.asc ? '▲' : '▼') : '⇅'}</span>
+    </th>`;
+  }).join('') + '</tr>';
+
+  thead.querySelectorAll('th').forEach(th => {
+    th.addEventListener('click', () => {
+      const ci = parseInt(th.dataset.col);
+      sortState.col === ci ? (sortState.asc = !sortState.asc) : (sortState.col = ci, sortState.asc = true);
+      const key = COLUMNS[ci].key;
+      rows.sort((a, b) => {
+        const av = a[key] || '', bv = b[key] || '';
+        return sortState.asc ? av.toString().localeCompare(bv.toString(), 'pt-BR') : bv.toString().localeCompare(av.toString(), 'pt-BR');
+      });
+      renderTable(rows);
+    });
+  });
+
+  tbody.innerHTML = rows.map(row =>
+    '<tr>' + COLUMNS.map(c => {
+      const val = row[c.key] ?? '';
+      const cls = c.fmt === 'mono' ? ' class="mono"' : c.fmt === 'money' ? ' class="right"' : '';
+      const title = c.fmt === 'vencimento' ? '' : ` title="${String(val).replace(/"/g,'&quot;')}"`;
+      return `<td${cls}${title}>${cellContent(c, val, row)}</td>`;
+    }).join('') + '</tr>'
+  ).join('');
+
+  document.getElementById('toolbar-count').textContent = `${rows.length} linha${rows.length !== 1 ? 's' : ''}`;
+}
+
+// ─── Stats ───────────────────────────────────────────────────────────────────
+function updateStats(rows) {
+  const notasMap = new Map();
+  for (const row of rows) {
+    const key = row.chNFe || `${row.emitCNPJ}|${row.nNF}|${row.serie}`;
+    if (!notasMap.has(key)) notasMap.set(key, row.situacao);
+  }
+  let total = notasMap.size, aut = 0, can = 0, con = 0;
+  for (const sit of notasMap.values()) {
+    if (sit === 'autorizada')   aut++;
+    else if (sit === 'cancelada') can++;
+    else if (sit === 'contingencia') con++;
+  }
+  document.getElementById('st-total').textContent = total;
+  document.getElementById('st-aut').textContent   = aut;
+  document.getElementById('st-can').textContent   = can;
+  document.getElementById('st-con').textContent   = con;
+
+  // mini bars
+  const pct = v => total > 0 ? Math.round((v / total) * 100) + '%' : '0%';
+  document.getElementById('bar-total').style.width = '100%';
+  document.getElementById('bar-aut').style.width   = pct(aut);
+  document.getElementById('bar-can').style.width   = pct(can);
+  document.getElementById('bar-con').style.width   = pct(con);
+}
+
+// ─── Filtros ─────────────────────────────────────────────────────────────────
+function getFilteredRows() {
+  let rows = parsedRows;
+  if (activeFilter !== 'all') {
+    rows = rows.filter(r => r.situacao === activeFilter);
+  }
+  const q = document.getElementById('search-input').value.toLowerCase();
+  if (q) {
+    rows = rows.filter(r =>
+      (r.nNF||'').includes(q) ||
+      (r.emitNome||'').toLowerCase().includes(q) ||
+      (r.destNome||'').toLowerCase().includes(q) ||
+      (r.emitCNPJ||'').includes(q) ||
+      (r.destCNPJCPF||'').includes(q) ||
+      (r.chNFe||'').includes(q) ||
+      (r.xProd||'').toLowerCase().includes(q) ||
+      (r.CFOP||'').includes(q)
+    );
+  }
+  return rows;
+}
+
+document.getElementById('search-input').addEventListener('input', () => renderTable(getFilteredRows()));
+
+document.getElementById('filter-tabs').addEventListener('click', e => {
+  const tab = e.target.closest('.filter-tab');
+  if (!tab) return;
+  document.querySelectorAll('.filter-tab').forEach(t => t.classList.remove('active'));
+  tab.classList.add('active');
+  activeFilter = tab.dataset.filter;
+  renderTable(getFilteredRows());
+});
+
+// ─── Arquivos ────────────────────────────────────────────────────────────────
+function addFiles(newFiles) {
+  const existing = new Set(loadedFiles.map(f => f.name + f.size));
+  Array.from(newFiles).forEach(f => {
+    if (!existing.has(f.name + f.size)) loadedFiles.push(f);
+  });
+  renderFileList();
+  document.getElementById('btn-process').disabled = loadedFiles.length === 0;
+}
+
+function renderFileList() {
+  const wrap = document.getElementById('file-list-wrap');
+  const list = document.getElementById('file-list');
+  if (!loadedFiles.length) { wrap.style.display = 'none'; return; }
+  wrap.style.display = 'block';
+  list.innerHTML = loadedFiles.map((f, i) => `
+    <div class="file-item">
+      <span class="fi-dot"></span>
+      <span class="fi-name" title="${f.name}">${f.name}</span>
+      <span class="fi-remove" data-idx="${i}">×</span>
+    </div>
+  `).join('');
+  list.querySelectorAll('.fi-remove').forEach(btn => {
+    btn.addEventListener('click', () => {
+      loadedFiles.splice(parseInt(btn.dataset.idx), 1);
+      renderFileList();
+      document.getElementById('btn-process').disabled = loadedFiles.length === 0;
+    });
+  });
+}
+
+const dz = document.getElementById('dropzone');
+dz.addEventListener('dragover', e => { e.preventDefault(); dz.classList.add('drag-over'); });
+dz.addEventListener('dragleave', () => dz.classList.remove('drag-over'));
+dz.addEventListener('drop', e => { e.preventDefault(); dz.classList.remove('drag-over'); addFiles(e.dataTransfer.files); });
+document.getElementById('xml-input').addEventListener('change', e => addFiles(e.target.files));
+
+// ─── Limpar ───────────────────────────────────────────────────────────────────
+document.getElementById('btn-clear').addEventListener('click', () => {
+  loadedFiles = []; parsedRows = []; eventosMap.clear(); activeFilter = 'all';
+  renderFileList();
+  document.getElementById('btn-process').disabled = true;
+  document.getElementById('btn-export').disabled  = true;
+  document.getElementById('btn-clear').style.display = 'none';
+  document.getElementById('stats-section').style.display = 'none';
+  document.getElementById('empty-state').style.display = 'flex';
+  document.getElementById('table-view').style.display   = 'none';
+  document.getElementById('search-input').value = '';
+  document.querySelectorAll('.filter-tab').forEach((t,i) => { t.classList.toggle('active', i===0); });
+});
+
+// ─── Processar ────────────────────────────────────────────────────────────────
+document.getElementById('btn-process').addEventListener('click', async () => {
+  if (!loadedFiles.length) return;
+  parsedRows = []; eventosMap.clear();
+
+  const progSec   = document.getElementById('progress-section');
+  const progBar   = document.getElementById('progress-bar');
+  const progLabel = document.getElementById('progress-label');
+  progSec.style.display = 'block';
+
+  for (let i = 0; i < loadedFiles.length; i++) {
+    const pct = Math.round((i / loadedFiles.length) * 100);
+    progBar.style.width = pct + '%';
+    progLabel.textContent = `${i+1} / ${loadedFiles.length} arquivos`;
+
+    const xmlText = await loadedFiles[i].text();
+    const doc = new DOMParser().parseFromString(xmlText, 'text/xml');
+
+    const evento = parseEventoCancelamento(doc);
+    if (evento) {
+      eventosMap.set(evento.chNFe, { tipo: 'cancelamento', nProt: evento.nProt });
+      continue;
+    }
+
+    const rows = parseNFe(doc, loadedFiles[i].name);
+    if (rows) parsedRows.push(...rows);
+  }
+
+  progBar.style.width = '100%';
+  setTimeout(() => { progSec.style.display = 'none'; }, 700);
+
+  if (!parsedRows.length && eventosMap.size === 0) {
+    showToast('Nenhum dado válido encontrado nos XMLs.', true); return;
+  }
+  if (eventosMap.size > 0) parsedRows = aplicarEventos(parsedRows, eventosMap);
+  if (!parsedRows.length) {
+    showToast('Nenhuma NF-e encontrada (apenas eventos sem a nota correspondente).', true); return;
+  }
+
+  updateStats(parsedRows);
+  document.getElementById('stats-section').style.display = 'block';
+  document.getElementById('empty-state').style.display   = 'none';
+  const tv = document.getElementById('table-view');
+  tv.style.display = 'flex';
+  renderTable(getFilteredRows());
+  document.getElementById('btn-export').disabled = false;
+  document.getElementById('btn-clear').style.display = 'flex';
+  showToast(`✅ ${parsedRows.length} linha(s) processada(s).`);
+});
+
+// ─── Exportar Excel ───────────────────────────────────────────────────────────
+document.getElementById('btn-export').addEventListener('click', () => {
+  if (!parsedRows.length) return;
+
+  const headers = COLUMNS.map(c => c.label);
+  const data = parsedRows.map(row =>
+    COLUMNS.map(c => {
+      let v = row[c.key] ?? '';
+      if (c.fmt === 'money') { const n = parseFloat(v); return isNaN(n) ? v : n; }
+      if (c.fmt === 'date' && v) {
+        try { return new Date(v).toLocaleString('pt-BR'); } catch { return v; }
+      }
+      if (c.fmt === 'vencimento') {
+        // Para Excel: exporta datas separadas por " | " com valores
+        return row.dVenc || '';
+      }
+      return v;
+    })
+  );
+
+  const ws = XLSX.utils.aoa_to_sheet([headers, ...data]);
+  ws['!cols'] = COLUMNS.map(c => {
+    const lens = [c.label.length, ...parsedRows.map(r => String(r[c.key]||'').length)];
+    return { wch: Math.min(Math.max(...lens) + 2, 50) };
+  });
+
+  COLUMNS.forEach((_, ci) => {
+    const addr = XLSX.utils.encode_cell({r:0, c:ci});
+    if (!ws[addr]) return;
+    ws[addr].s = {
+      font: { bold: true, color: { rgb: 'FFFFFF' }, sz: 10 },
+      fill: { fgColor: { rgb: '1e3a5f' }, patternType: 'solid' },
+      alignment: { horizontal: 'center', vertical: 'center', wrapText: true },
+      border: { bottom: { style: 'thin', color: { rgb: '3b82f6' } } }
+    };
+  });
+
+  parsedRows.forEach((_, ri) => {
+    const even = ri % 2 === 0;
+    COLUMNS.forEach((c, ci) => {
+      const addr = XLSX.utils.encode_cell({r: ri+1, c: ci});
+      if (!ws[addr]) return;
+      const base = {
+        fill: { fgColor: { rgb: even ? 'f8fafc' : 'eef2f7' }, patternType: 'solid' },
+        alignment: { vertical: 'center' }
+      };
+      if (c.fmt === 'money')      { base.numFmt = '#,##0.00'; base.alignment.horizontal = 'right'; }
+      if (c.fmt === 'mono')       { base.font = { name: 'Courier New', sz: 9 }; }
+      if (c.fmt === 'vencimento') { base.alignment.wrapText = true; }
+      ws[addr].s = base;
+    });
+  });
+
+  const wb = XLSX.utils.book_new();
+  XLSX.utils.book_append_sheet(wb, ws, 'NF-e');
+
+  const nfs    = new Set(parsedRows.map(r => r.chNFe || r.nNF));
+  const counts = parsedRows.reduce((a,r) => { a[r.situacao]=(a[r.situacao]||0)+1; return a; }, {});
+
+  // Resumo de duplicatas
+  const comDuplicate = parsedRows.filter(r => r._dVencArray && r._dVencArray.length > 0);
+  const totalDups    = parsedRows.reduce((sum, r) => sum + (r._dVencArray ? r._dVencArray.length : 0), 0);
+
+  const sumData = [
+    ['Resumo da Exportação'], [],
+    ['Total de Notas Distintas', nfs.size],
+    ['Total de Linhas (itens)', parsedRows.length],
+    ['Autorizadas', counts['autorizada']||0],
+    ['Canceladas', counts['cancelada']||0],
+    ['Contingência', counts['contingencia']||0],
+    ['Denegadas', counts['denegada']||0], [],
+    ['Itens com Duplicatas', comDuplicate.length],
+    ['Total de Parcelas/Vencimentos', totalDups], [],
+    ['Data de Exportação', new Date().toLocaleString('pt-BR')],
+    ['Gerado por', 'NF-e Converter'],
+  ];
+  const ws2 = XLSX.utils.aoa_to_sheet(sumData);
+  ws2['!cols'] = [{wch:35},{wch:25}];
+  XLSX.utils.book_append_sheet(wb, ws2, 'Resumo');
+
+  const today = new Date().toISOString().slice(0,10);
+  XLSX.writeFile(wb, `NF-e_Export_${today}.xlsx`);
+  showToast('📥 Excel gerado com sucesso!');
+});
+
+// ─── Toast ────────────────────────────────────────────────────────────────────
+function showToast(msg, error = false) {
+  const t = document.createElement('div');
+  t.className = 'toast' + (error ? ' error' : '');
+  t.innerHTML = `<span class="toast-dot"></span> ${msg}`;
+  document.body.appendChild(t);
+  setTimeout(() => t.remove(), 3500);
+}
+</script>
 </body>
 </html>
