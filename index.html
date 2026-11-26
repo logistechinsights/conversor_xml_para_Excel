@@ -1,173 +1,873 @@
-<!doctype html><html lang="pt-BR"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Conversor PDF para Excel</title>
-<link rel="preconnect" href="https://fonts.googleapis.com"><link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet">
-<style>
-:root{--bg:#f5f7f9;--sf:#fff;--sf2:#f8fafb;--ink:#0f1b26;--mu:#667585;--ln:#e3e8ed;--ac:#0d6b66;--ac2:#0a524e;--acs:#e2f3f1;--wn:#a15c07;--wns:#fdf1dc;--bd:#b42318;--bds:#fdeceb;--ok:#15803d;--oks:#e5f5ea;--sh:0 1px 2px rgba(15,27,38,.05),0 8px 28px rgba(15,27,38,.06)}
-@media(prefers-color-scheme:dark){:root{--bg:#0b1218;--sf:#131c24;--sf2:#18232c;--ink:#e8eef3;--mu:#8997a4;--ln:#24323e;--ac:#35d0c0;--ac2:#7fe6da;--acs:#0f3230;--wn:#fbbf24;--wns:#33270d;--bd:#f87171;--bds:#35171a;--ok:#4ade80;--oks:#10301d;--sh:0 1px 2px rgba(0,0,0,.4)}}
-*{box-sizing:border-box}html{color-scheme:light dark}
-body{margin:0;background:var(--bg);color:var(--ink);font:14px/1.5 Inter,"Segoe UI",system-ui,Arial,sans-serif;-webkit-font-smoothing:antialiased}
-button{font:inherit;cursor:pointer}button:disabled{opacity:.45;cursor:not-allowed}:focus-visible{outline:2px solid var(--ac);outline-offset:2px}
-svg{width:18px;height:18px;flex:none}
-.top{background:var(--sf);border-bottom:1px solid var(--ln)}
-.top-in{max-width:1500px;margin:0 auto;padding:12px 28px;display:flex;align-items:center;gap:20px;flex-wrap:wrap}
-.brand{display:flex;align-items:center;gap:10px;font-weight:650;font-size:15px}
-.logo{width:32px;height:32px;border-radius:9px;background:var(--ac);color:#fff;display:grid;place-items:center}
-@media(prefers-color-scheme:dark){.logo{color:#06201d}}
-.grow{flex:1}
-.steps{display:flex;gap:6px;list-style:none;margin:0;padding:0;flex-wrap:wrap}
-.steps li{display:flex;align-items:center;gap:8px;padding:5px 12px 5px 6px;border-radius:99px;color:var(--mu);font-weight:550;font-size:13px}
-.steps li+li:before{content:"";width:18px;height:1px;background:var(--ln);margin-right:6px;margin-left:-14px;display:none}
-.dot{width:22px;height:22px;border-radius:50%;display:grid;place-items:center;background:var(--sf2);border:1px solid var(--ln);font-size:11.5px;font-weight:700}
-.dot svg{width:13px;height:13px}
-.steps .now{color:var(--ink);background:var(--acs)}.steps .now .dot{background:var(--ac);border-color:var(--ac);color:#fff}
-.steps .done{color:var(--ok)}.steps .done .dot{background:var(--oks);border-color:transparent;color:var(--ok)}
-@media(prefers-color-scheme:dark){.steps .now .dot{color:#06201d}}
-.btn{display:inline-flex;align-items:center;gap:8px;border:1px solid transparent;border-radius:10px;padding:9px 16px;font-weight:600;transition:.15s}
-.btn.pri{background:var(--ac);color:#fff}.btn.pri:hover:not(:disabled){background:var(--ac2)}
-@media(prefers-color-scheme:dark){.btn.pri,.btn.pri:hover:not(:disabled){color:#06201d}}
-.btn.sec{background:var(--sf);border-color:var(--ln);color:var(--ink)}.btn.sec:hover:not(:disabled){background:var(--sf2);border-color:var(--mu)}
-.btn.ghost{background:transparent;color:var(--mu);padding:7px 10px}.btn.ghost:hover:not(:disabled){background:var(--sf2);color:var(--ink)}
-.btn.lg{padding:12px 22px;font-size:15px}
-.wrap{max-width:1500px;margin:0 auto;padding:26px 28px 70px;display:grid;gap:20px}
-.panel{background:var(--sf);border:1px solid var(--ln);border-radius:14px;box-shadow:var(--sh)}
-.hero{text-align:center;padding:10px 0 0}.hero h1{margin:0 0 6px;font-size:30px;letter-spacing:-.02em;font-weight:700}.hero p{margin:0;color:var(--mu);font-size:15px}
-.drop{border:1.5px dashed var(--ln);border-radius:14px;background:var(--sf);text-align:center;padding:44px 20px;display:flex;flex-direction:column;align-items:center;gap:8px;transition:.15s;max-width:760px;margin:0 auto;width:100%}
-.drop.drag{border-color:var(--ac);background:var(--acs)}
-.drop .ic{width:56px;height:56px;border-radius:16px;background:var(--acs);color:var(--ac);display:grid;place-items:center}.drop .ic svg{width:28px;height:28px}
-.drop b{font-size:17px}.drop span{color:var(--mu)}.drop input{display:none}.drop label{margin-top:10px}
-.drop.slim{flex-direction:row;padding:14px 18px;max-width:none;gap:14px;text-align:left}.drop.slim .ic{width:38px;height:38px;border-radius:11px}.drop.slim .ic svg{width:20px;height:20px}.drop.slim label{margin:0}
-.queue{padding:6px 6px;max-width:760px;margin:0 auto;width:100%}
-.queue.wide{max-width:none}
-.file{display:grid;grid-template-columns:auto 1fr 140px 96px auto;gap:14px;align-items:center;padding:10px 12px;border-radius:10px}
-.file+.file{border-top:1px solid var(--ln)}
-.file .fi{width:34px;height:34px;border-radius:9px;background:var(--sf2);display:grid;place-items:center;color:var(--mu)}
-.file b{display:block;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}.file small{color:var(--mu)}
-@media(max-width:700px){.file{grid-template-columns:auto 1fr auto}.file .prog{grid-column:1/-1}}
-.prog{height:6px;background:var(--ln);border-radius:9px;overflow:hidden}.prog i{display:block;height:100%;background:var(--ac);transition:width .25s}
-.chip{display:inline-flex;justify-content:center;padding:3px 10px;border-radius:99px;font-size:12px;font-weight:600;background:var(--sf2);color:var(--mu)}
-.chip.c{background:var(--oks);color:var(--ok)}.chip.p{background:var(--acs);color:var(--ac)}.chip.r{background:var(--wns);color:var(--wn)}.chip.e{background:var(--bds);color:var(--bd)}
-.qbar{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:10px 12px;border-top:1px solid var(--ln)}
-.warn{padding:11px 14px;border-radius:10px;background:var(--wns);color:var(--wn);font-weight:500}
-.res{display:grid;grid-template-columns:260px minmax(0,1fr);gap:20px;align-items:start}
-@media(max-width:960px){.res{grid-template-columns:1fr}}
-.rail{padding:10px;display:flex;flex-direction:column;gap:4px;position:sticky;top:16px}
-@media(max-width:960px){.rail{position:static;flex-direction:row;overflow:auto}}
-.rail-t{padding:6px 10px;color:var(--mu);font-size:12.5px;font-weight:600}
-.ri{border:0;background:transparent;text-align:left;padding:10px 12px;border-radius:10px;display:grid;grid-template-columns:1fr auto;gap:0 8px;color:var(--ink);min-width:200px}
-.ri span{font-weight:600;font-size:13.5px}.ri em{font-style:normal;font-weight:650;color:var(--mu);font-variant-numeric:tabular-nums}
-.ri small{grid-column:1/-1;color:var(--mu);overflow:hidden;text-overflow:ellipsis;white-space:nowrap;font-size:12px}
-.ri:hover{background:var(--sf2)}.ri.on{background:var(--acs)}.ri.on em{color:var(--ac)}
-.main{display:grid;gap:16px;min-width:0}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));overflow:hidden}
-.kpi{padding:16px 20px;border-right:1px solid var(--ln)}.kpi:last-child{border-right:0}
-.kpi .l{color:var(--mu);font-size:12.5px}.kpi .v{font-size:25px;font-weight:650;letter-spacing:-.02em;margin:3px 0 1px;font-variant-numeric:tabular-nums}.kpi .n{color:var(--mu);font-size:12px}
-.kpi.hi{background:var(--acs)}.kpi.hi .v{color:var(--ac2)}
-@media(prefers-color-scheme:dark){.kpi.hi .v{color:var(--ac)}}
-@media(max-width:700px){.kpi{border-right:0;border-bottom:1px solid var(--ln)}}
-.tools{display:flex;gap:10px;align-items:center;flex-wrap:wrap;padding:14px 16px}
-.tools h2{margin:0;font-size:16px;font-weight:650}.count{color:var(--mu);font-size:12.5px}
-.search{position:relative;flex:1;min-width:230px;max-width:440px}
-.search svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);width:16px;height:16px;color:var(--mu)}
-.search input{width:100%;padding:9px 12px 9px 35px;border:1px solid var(--ln);border-radius:10px;background:var(--sf2);color:var(--ink);font:inherit}
-.search input:focus{outline:none;border-color:var(--ac);box-shadow:0 0 0 3px var(--acs)}
-.seg{display:inline-flex;border:1px solid var(--ln);border-radius:10px;overflow:hidden}
-.seg button{border:0;background:var(--sf);color:var(--mu);padding:8px 12px;font-weight:600;font-size:13px}.seg button+button{border-left:1px solid var(--ln)}
-.seg button.on{background:var(--acs);color:var(--ac)}
-.tbl{overflow:auto;max-height:620px;border-top:1px solid var(--ln);border-radius:0 0 14px 14px}
-table{border-collapse:separate;border-spacing:0;min-width:100%;width:max-content;font-variant-numeric:tabular-nums}
-th,td{padding:9px 14px;border-bottom:1px solid var(--ln);white-space:nowrap;max-width:420px;overflow:hidden;text-overflow:ellipsis;text-align:left}
-td.num{text-align:right}
-th{position:sticky;top:0;z-index:2;background:var(--sf2);font-weight:600;font-size:12.5px;color:var(--mu);cursor:pointer;user-select:none}
-th:hover{color:var(--ink)}th.on{color:var(--ac)}
-.frow th{top:37px;padding:6px 8px;cursor:default;z-index:1}
-.frow input{width:100%;min-width:90px;border:1px solid var(--ln);border-radius:7px;padding:5px 8px;font:inherit;font-size:12px;background:var(--sf);color:var(--ink)}
-tbody tr:nth-child(even) td{background:color-mix(in srgb,var(--sf2) 55%,transparent)}
-tbody tr:hover td{background:var(--acs)}
-td[contenteditable]:focus{outline:2px solid var(--ac);outline-offset:-2px;background:var(--sf);text-overflow:clip}
-td.empty{text-align:center;padding:48px;color:var(--mu);white-space:normal}
-.tip{padding:9px 16px;border-top:1px solid var(--ln);color:var(--mu);font-size:12.5px}
-details{padding:14px 18px}summary{cursor:pointer;font-weight:600;color:var(--mu)}
-.log{margin-top:10px;background:#0f1a24;color:#cfe3f1;padding:12px;border-radius:9px;white-space:pre-wrap;max-height:160px;overflow:auto;font:12px/1.55 ui-monospace,Consolas,monospace}
-.toast{position:fixed;left:50%;bottom:26px;transform:translateX(-50%);background:var(--ink);color:var(--bg);padding:11px 18px;border-radius:12px;font-weight:600;box-shadow:var(--sh);display:flex;gap:8px;align-items:center;z-index:50}
-@media(prefers-reduced-motion:reduce){*{transition:none!important}}
-</style></head><body><div id="root"></div>
-<script src="https://cdn.jsdelivr.net/npm/react@18.3.1/umd/react.production.min.js"></script><script src="https://cdn.jsdelivr.net/npm/react-dom@18.3.1/umd/react-dom.production.min.js"></script><script src="https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.min.js"></script><script src="https://cdn.jsdelivr.net/npm/xlsx@0.18.5/dist/xlsx.full.min.js"></script><script>
-pdfjsLib.GlobalWorkerOptions.workerSrc='https://cdn.jsdelivr.net/npm/pdfjs-dist@3.11.174/build/pdf.worker.min.js';const h=React.createElement;
-/* ===================== LÓGICA ORIGINAL (inalterada) ===================== */
-const TYPES={almox:{name:'Almoxarifado de Garantia',cols:['Código','Saldo Estoque','Contagem','Último Balanço','Descrição','Aplicação','Localização','Página','Texto Original']},estoque:{name:'Estoque de Garantia',cols:['Código Comercial','Descrição','Original','Quantidade','Custo Unitário','Marca','Última Data','Página','Texto Original']},notas:{name:'Notas de Garantia',cols:['Pedido','Nome','Comercial','Descrição','Custo','Data','Quantidade','Valor Pedido','Página','Texto Original']},precos:{name:'Lista de Preços - Todo Estoque',cols:['Código','Descrição','Aplicação','Preço','Margem','Custo','Saldo','Valor Total','Página','Texto Original']},tgd:{name:'TGD - Troca, Garantia e Devolução',cols:['Produto','Descrição','Linha','Representante','Televenda','Quantidade','Total','Tipo','Observação','Página','Texto Original']},rua24:{name:'Estoque por Localização - Rua 24',cols:['Interno','Comercial','Original','Descrição','Código Linha','Saldo','LOC1','LOC2','Página','Texto Original']},devol:{name:'Parcial por Times - Devoluções',cols:['Meta','Meta Time','Vendedor','Vendas','Markup','% Individual','Qtd Vendas','Qtd Devoluções','Valor Devoluções','% Devolução','Markup Líquido','Faturamento Líquido','Devolução Total','% Devolução Total','Página','Texto Original']},catalogo:{name:'Catálogo RHO',cols:['Código','Descrição','Aplicação','Preço','Saldo','Referência','Página','Texto Original']}};
-const money=s=>{if(!s)return null;let n=Number(s.replace(/R\$\s?/g,'').replace(/\./g,'').replace(',','.').replace(/[^\d.-]/g,''));return Number.isFinite(n)?n:null},num=money;
-function detect(t){let u=t.toUpperCase();if(u.includes('R-CATALOGO')&&u.includes('REF:')&&u.includes('SALDO:'))return'catalogo';if(u.includes('PARCIAL POR TIMES'))return'devol';if(u.includes('LISTA DE PREÇOS')||u.includes('MARGEM')&&u.includes('VALOR TOTAL'))return'precos';if(u.includes('ESTOQUE POR LOCALIZAÇÃO'))return'rua24';if(u.includes('VALOR PEDIDO')&&u.includes('COMERCIAL'))return'notas';if(u.includes('PRODUTO')&&u.includes('TELEVENDA')&&u.includes('QTDE'))return'tgd';if(u.includes('ULT. BALANÇO')||u.includes('LISTAGEM DE PRODUTOS PELA CLASSIFICAÇÃO'))return'almox';if(u.includes('GARANTIA EM ESTOQUE')||u.includes('COD.COMERCIAL')&&u.includes('CUSTO UNIT.')&&u.includes('ULT. DATA'))return'estoque';return null}
-function rows(items){let a=[];for(let it of items){if(!it.str.trim())continue;let y=Math.round(it.transform[5]*2)/2,r=a.find(z=>Math.abs(z.y-y)<4);if(!r){r={y,items:[]};a.push(r)}r.items.push({x:it.transform[4],s:it.str.trim()})}return a.sort((x,y)=>y.y-x.y).map(r=>{r.items.sort((x,y)=>x.x-y.x);r.text=r.items.map(i=>i.s).join(' ').replace(/\s+/g,' ').trim();return r})}
-function region(block,a,b){return block.flatMap(r=>r.items.filter(i=>i.x>=a&&i.x<b).map(i=>i.s)).join(' ').replace(/\s+/g,' ').trim()}function mk(cols,v,p,raw){let o={};cols.forEach((c,i)=>o[c]=v[i]??'');o.Página=p;o['Texto Original']=raw;return o}
-function parse(type,pages){let out=[],issues=[],C=TYPES[type].cols;for(let p of pages){
-if(type==='notas'){for(let rr of p.rows.filter(r=>r.items.some(i=>i.x<70&&/^\d{5,6}$/.test(i.s)))){let g=(a,b)=>region([rr],a,b),idx=p.rows.indexOf(rr),n=p.rows[idx+1],nome=g(70,320),desc=g(375,470),raw=rr.text;if(n&&Math.abs(rr.y-n.y)<14&&!n.items.some(i=>i.x<70)){nome=(nome+' '+region([n],70,320)).trim();desc=(desc+' '+region([n],375,470)).trim();raw+=' | '+n.text}out.push(mk(C,[g(0,70),nome,g(320,375),desc,money(g(470,545)),g(545,595),num(g(595,645)),money(g(645,999))],p.n,raw))}}
-else if(type==='estoque'){for(let r of p.rows){let g=(a,b)=>region([r],a,b),cod=g(25,115);if(/^MD\s*\d+$/i.test(cod))out.push(mk(C,[cod,g(115,275),g(275,370),num(g(370,405)),money(g(405,480)),g(480,565),g(565,999)],p.n,r.text))}}
-else if(type==='almox'){let st=p.rows.map((r,i)=>r.items.some(x=>x.x<100&&/^MD(?:\s*\d+)?$/i.test(x.s))||/^MD\s*\d+/i.test(r.text)?i:-1).filter(i=>i>=0);for(let z=0;z<st.length;z++){let b=p.rows.slice(st[z],st[z+1]??p.rows.length).filter(r=>r.y>55),g=(a,c)=>region(b,a,c),m=g(25,110).match(/MD\s*\d+/i);if(m)out.push(mk(C,[m[0],num(g(110,190)),'',g(245,325),g(325,480),g(480,715),g(715,999)],p.n,b.map(r=>r.text).join(' | ')))}}
-else if(type==='precos'){for(let r of p.rows){let g=(a,b)=>region([r],a,b),cod=g(25,105);if(/^MD\s*\d+$/i.test(cod))out.push(mk(C,[cod,g(105,315),g(315,560),money(g(710,755)),g(650,710),money(g(610,650)),num(g(560,610)),money(g(755,999))],p.n,r.text))}}
-else if(type==='tgd'){let anchors=p.rows.filter(r=>/^MD\s*\d+/i.test(r.text));for(let z=0;z<anchors.length;z++){let a=anchors[z],next=anchors[z+1],b=p.rows.filter(r=>r.y<=a.y+5&&(!next||r.y>next.y+5)&&r.y>60),g=(x1,x2)=>region(b,x1,x2),m=g(25,95).match(/MD\s*\d+/i);if(!m)continue;let obs=b.filter(r=>/PROC\./i.test(r.text)).map(r=>r.text.slice(r.text.search(/PROC\./i))).join(' '),linha=g(240,294),rep=g(294,370),tv=g(370,450),tipo=g(528,999).replace(/PROC\..*/i,'').trim();out.push(mk(C,[m[0],g(95,240),linha,rep,tv,num(g(450,485)),money(g(485,528)),tipo,obs],p.n,b.map(r=>r.text).join(' | ')))}}
-else if(type==='rua24'){for(let x of p.lines){let m=x.match(/^(\d+)\s+(MD\s*\d+)\s+(.*?)\s{1,}([A-ZÁÉÍÓÚÇ].+?)\s+(\d+)\s+([\d.,-]+)\s+([\w./-]+(?:\s*\/\s*\w+)?)\s+([\w./-]+)$/i);if(m)out.push(mk(C,[m[1],m[2],m[3],m[4],num(m[5]),num(m[6]),m[7],m[8]],p.n,x))}}
-else if(type==='catalogo'){
- let anchors=p.rows.filter(r=>/^MD\s*\d+/i.test(r.text));
- for(let side of [0,1]){
-  let list=anchors.filter(r=>{let x=r.items.find(i=>/^MD(?:\s*\d+)?$/i.test(i.s))?.x??r.items[0]?.x??0;return side===0?x<305:x>=305});
-  for(let z=0;z<list.length;z++){
-   let a=list[z],next=list[z+1],x1=side===0?20:305,x2=side===0?305:605;
-   let block=p.rows.filter(r=>r.y<=a.y+5&&(!next||r.y>next.y+5)).map(r=>({y:r.y,items:r.items.filter(i=>i.x>=x1&&i.x<x2)})).filter(r=>r.items.length);
-   let raw=block.map(r=>r.items.map(i=>i.s).join(' ')).join(' ').replace(/\s+/g,' ').trim();
-   let code=(raw.match(/^MD\s*(\d+)/i)||[])[1];if(!code)continue;
-   let after=raw.replace(/^MD\s*\d+\s*/i,'');
-   let appAt=after.search(/3\s*RHO\s*\d+/i),refAt=after.search(/\bREF\s*:/i),priceM=after.match(/R\$\s*([\d.,]+)/i),saldoM=after.match(/Saldo\s*:\s*([\d.,]+)/i),refM=after.match(/REF\s*:\s*(.*?)\s+R\$/i);
-   if(appAt<0||refAt<0||!priceM)continue;
-   let desc=after.slice(0,appAt).trim(),aplic=after.slice(appAt,refAt).trim(),ref=(refM?.[1]||'').trim();
-   let norm=x=>x.replace(/3\s*RH\s*O+/gi,'3RHO').replace(/3\s*RHO/gi,'3RHO').replace(/\s+/g,' ').trim();
-   out.push(mk(C,['MD '+code,desc,norm(aplic),money(priceM[1]),saldoM?num(saldoM[1]):'',norm(ref)],p.n,raw));
-  }
- }
-}
-else if(type==='devol'){for(let x of p.lines){let m=x.match(/^(R\$\s*[\d.,]+)\s+(R\$\s*[\d.,]+)\s+(.+?)\s+(R\$\s*[\d.,]+)\s+([\d.,]+%)\s+([\d.,]+%)\s+(\d+)\s+(\d+)\s+(R\$\s*[\d.,]+)\s+([\d.,]+%)\s+([\d.,]+%)\s+(R\$\s*[\d.,]+)\s+(R\$\s*[\d.,]+)\s+([\d.,]+%)$/i);if(m)out.push(mk(C,[money(m[1]),money(m[2]),m[3],money(m[4]),m[5],m[6],num(m[7]),num(m[8]),money(m[9]),m[10],m[11],money(m[12]),money(m[13]),m[14]],p.n,x))}}
-}if(!out.length)issues.push(TYPES[type].name+': nenhum registro reconhecido.');return{rows:out,issues}}
-async function extract(f,progress){let pdf=await pdfjsLib.getDocument({data:await f.arrayBuffer()}).promise,a=[];for(let i=1;i<=pdf.numPages;i++){let tc=await(await pdf.getPage(i)).getTextContent({normalizeWhitespace:true}),r=rows(tc.items);a.push({n:i,rows:r,lines:r.map(x=>x.text)});progress(Math.round(i/pdf.numPages*100))}return a}
-/* ===================== INTERFACE ===================== */
-const svg=(d,p)=>h('svg',{viewBox:'0 0 24 24',fill:'none',stroke:'currentColor',strokeWidth:1.8,strokeLinecap:'round',strokeLinejoin:'round',...p},d.map((x,i)=>h('path',{d:x,key:i})));
-const I={up:['M12 16V4','M7 9l5-5 5 5','M4 16v3a1 1 0 0 0 1 1h14a1 1 0 0 0 1-1v-3'],search:['M11 18a7 7 0 1 0 0-14 7 7 0 0 0 0 14z','M21 21l-4.3-4.3'],file:['M14 3H7a2 2 0 0 0-2 2v14a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V8z','M14 3v5h5'],dl:['M12 4v12','M7 11l5 5 5-5','M4 20h16'],x:['M6 6l12 12','M18 6L6 18'],check:['M5 12l5 5 9-9'],plus:['M12 5v14','M5 12h14'],grid:['M4 4h7v7H4z','M13 4h7v7h-7z','M4 13h7v7H4z','M13 13h7v7h-7z']};
-const chipCls={Pronto:'',Processando:'p','Concluído':'c',Revisar:'r',Erro:'e'};
-function App(){
- const[files,setFiles]=React.useState([]),[sets,setSets]=React.useState({}),[active,setActive]=React.useState(''),[busy,setBusy]=React.useState(false),[log,setLog]=React.useState('Aguardando arquivos...'),[drag,setDrag]=React.useState(false),[query,setQuery]=React.useState(''),[filters,setFilters]=React.useState({}),[sort,setSort]=React.useState({col:'',dir:1}),[showF,setShowF]=React.useState(false),[showRaw,setShowRaw]=React.useState(false),[toast,setToast]=React.useState('');
- const all=Object.values(sets).flatMap(s=>s.rows),issues=Object.values(sets).flatMap(s=>s.issues),stage=all.length||Object.keys(sets).length?3:files.length?2:1;
- function notify(m){setToast(m);setTimeout(()=>setToast(''),3200)}
- function add(fs){let a=[...fs].filter(f=>f.name.toLowerCase().endsWith('.pdf'));if(!a.length&&fs.length)notify('Apenas arquivos PDF são aceitos.');setFiles(v=>[...v,...a.filter(f=>!v.some(x=>x.file.name===f.name&&x.file.size===f.size))].map(f=>f.file?f:{file:f,p:0,status:'Pronto'}))}
- async function process(){setBusy(true);let res={};for(let i=0;i<files.length;i++){let f=files[i];try{let ps=await extract(f.file,p=>setFiles(v=>v.map((x,k)=>k===i?{...x,p,status:'Processando'}:x))),type=detect(ps.slice(0,2).flatMap(x=>x.lines).join('\n'));if(!type)throw Error('Tipo de relatório não reconhecido');let q=parse(type,ps),key=type+'_'+i;res[key]={...q,type,name:f.file.name,pages:ps.length};setFiles(v=>v.map((x,k)=>k===i?{...x,p:100,status:q.rows.length?'Concluído':'Revisar'}:x));setLog(v=>v+'\n'+f.file.name+': '+q.rows.length+' registros.')}catch(e){setFiles(v=>v.map((x,k)=>k===i?{...x,status:'Erro'}:x));setLog(v=>v+'\nERRO '+f.file.name+': '+e.message)}}setSets(res);setActive(Object.keys(res)[0]||'');setBusy(false)}
- function exp(){let wb=XLSX.utils.book_new(),used={};Object.values(sets).forEach(s=>{let n=TYPES[s.type].name.slice(0,28),base=n,k=2;while(used[n])n=base.slice(0,25)+'_'+k++;used[n]=1;let ws=XLSX.utils.json_to_sheet(s.rows,{header:TYPES[s.type].cols});ws['!autofilter']={ref:ws['!ref']};ws['!cols']=TYPES[s.type].cols.map(c=>({wch:Math.min(55,Math.max(13,c.length+2))}));XLSX.utils.book_append_sheet(wb,ws,n)});XLSX.utils.book_append_sheet(wb,XLSX.utils.json_to_sheet(Object.values(sets).map(s=>({Arquivo:s.name,Tipo:TYPES[s.type].name,Páginas:s.pages,Registros:s.rows.length,Avisos:s.issues.join('; ')}))),'AUDITORIA');XLSX.writeFile(wb,'relatorios_consolidados.xlsx');notify('Planilha gerada: relatorios_consolidados.xlsx')}
- const sheet=sets[active],cols=sheet?TYPES[sheet.type].cols:[],dcols=showRaw?cols:cols.filter(c=>c!=='Texto Original'),q=query.toLocaleLowerCase('pt-BR');
- let visible=sheet?sheet.rows.filter(r=>(!q||cols.some(c=>String(r[c]??'').toLocaleLowerCase('pt-BR').includes(q)))&&cols.every(c=>!filters[c]||String(r[c]??'').toLocaleLowerCase('pt-BR').includes(filters[c].toLocaleLowerCase('pt-BR')))):[];
- if(sort.col)visible=[...visible].sort((a,b)=>{let x=a[sort.col],y=b[sort.col],nx=Number(x),ny=Number(y);if(Number.isFinite(nx)&&Number.isFinite(ny))return(nx-ny)*sort.dir;return String(x??'').localeCompare(String(y??''),'pt-BR',{numeric:true})*sort.dir});
- const br=n=>new Intl.NumberFormat('pt-BR',{maximumFractionDigits:2}).format(n);
- function choose(k){setActive(k);setQuery('');setFilters({});setSort({col:'',dir:1})}function order(c){setSort(v=>({col:c,dir:v.col===c?-v.dir:1}))}
- function val(r,c){let v=r[c];return typeof v==='number'&&Number.isFinite(v)?v:0}function total(c){return visible.reduce((a,r)=>a+val(r,c),0)}function avg(c){let a=visible.map(r=>r[c]).filter(v=>typeof v==='number'&&Number.isFinite(v));return a.length?a.reduce((x,y)=>x+y,0)/a.length:0}function uniq(c){return new Set(visible.map(r=>String(r[c]??'').trim()).filter(Boolean)).size}const currency=n=>new Intl.NumberFormat('pt-BR',{style:'currency',currency:'BRL'}).format(n||0);const integer=n=>new Intl.NumberFormat('pt-BR',{maximumFractionDigits:3}).format(n||0);
- function getMetrics(){if(!sheet)return[];let t=sheet.type;
-  if(t==='estoque')return[['Itens filtrados',integer(visible.length),'Registros exibidos'],['Quantidade total',integer(total('Quantidade')),'Soma das quantidades'],['Custo unitário médio',currency(avg('Custo Unitário')),'Média dos itens visíveis'],['Valor total do estoque',currency(visible.reduce((a,r)=>a+val(r,'Quantidade')*val(r,'Custo Unitário'),0)),'Quantidade × custo unitário',1]];
-  if(t==='almox')return[['Produtos',integer(visible.length),'Itens exibidos'],['Saldo total',integer(total('Saldo Estoque')),'Unidades em estoque',1],['Localizações',integer(uniq('Localização')),'Locais distintos'],['Saldo médio',integer(visible.length?total('Saldo Estoque')/visible.length:0),'Média por produto']];
-  if(t==='notas')return[['Pedidos',integer(uniq('Pedido')),'Pedidos distintos'],['Quantidade total',integer(total('Quantidade')),'Itens das notas'],['Custo médio',currency(avg('Custo')),'Custo médio unitário'],['Valor dos pedidos',currency(total('Valor Pedido')),'Soma dos valores',1]];
-  if(t==='precos')return[['Produtos',integer(visible.length),'Itens exibidos'],['Saldo total',integer(total('Saldo')),'Quantidade disponível'],['Custo médio',currency(avg('Custo')),'Média de custo'],['Valor total do estoque',currency(total('Valor Total')),'Soma dos itens visíveis',1]];
-  if(t==='tgd')return[['Registros TGD',integer(visible.length),'Trocas, garantias e devoluções'],['Quantidade total',integer(total('Quantidade')),'Itens movimentados'],['Valor total',currency(total('Total')),'Soma dos registros',1],['Valor médio',currency(avg('Total')),'Média por registro']];
-  if(t==='rua24')return[['Produtos',integer(visible.length),'Itens exibidos'],['Saldo total',integer(total('Saldo')),'Unidades localizadas',1],['LOC1 distintas',integer(uniq('LOC1')),'Posições primárias'],['LOC2 distintas',integer(uniq('LOC2')),'Posições secundárias']];
-  if(t==='catalogo')return[['Produtos',integer(visible.length),'Itens do catálogo'],['Saldo total',integer(total('Saldo')),'Unidades disponíveis',1],['Preço médio',currency(avg('Preço')),'Média dos itens visíveis'],['Valor total',currency(visible.reduce((a,r)=>a+val(r,'Preço')*val(r,'Saldo'),0)),'Preço × saldo',1]];
-    if(t==='devol')return[['Vendedores',integer(uniq('Vendedor')),'Vendedores exibidos'],['Vendas',currency(total('Vendas')),'Faturamento bruto'],['Valor devoluções',currency(total('Valor Devoluções')),'Devoluções filtradas'],['Faturamento líquido',currency(total('Faturamento Líquido')),'Após devoluções',1]];return[]}
- const steps=h('ol',{className:'steps'},['Adicionar PDFs','Converter','Revisar e exportar'].map((t,i)=>h('li',{key:i,className:i+1<stage?'done':i+1===stage?'now':''},h('span',{className:'dot'},i+1<stage?svg(I.check):i+1),t)));
- const top=h('header',{className:'top'},h('div',{className:'top-in'},h('div',{className:'brand'},h('div',{className:'logo'},svg(I.grid)),'Conversor de Relatórios'),h('div',{className:'grow'}),steps,h('button',{className:'btn pri',onClick:exp,disabled:!all.length},svg(I.dl),'Exportar Excel')));
- const slim=files.length>0;
- const dropzone=h('div',{className:'drop'+(drag?' drag':'')+(slim?' slim':''),onDragOver:e=>{e.preventDefault();setDrag(true)},onDragLeave:()=>setDrag(false),onDrop:e=>{e.preventDefault();setDrag(false);add(e.dataTransfer.files)}},h('div',{className:'ic'},svg(slim?I.plus:I.up)),h('div',{className:slim?'grow':''},h('b',null,slim?'Adicionar mais PDFs':'Arraste seus PDFs aqui'),h('div',null,h('span',null,slim?'Solte aqui ou escolha no computador':'ou escolha os arquivos no computador. Nada sai do seu navegador.'))),h('label',{className:'btn '+(slim?'sec':'pri lg')},slim?'Escolher PDFs':'Escolher PDFs',h('input',{type:'file',multiple:true,accept:'.pdf',onChange:e=>{add(e.target.files);e.target.value=''}})));
- const queue=slim?h('section',{className:'panel queue'+(stage===3?' wide':'')},files.map((x,i)=>h('div',{className:'file',key:i},h('div',{className:'fi'},svg(I.file)),h('div',{style:{minWidth:0}},h('b',null,x.file.name),h('small',null,(x.file.size/1048576).toFixed(2)+' MB')),h('div',{className:'prog'},h('i',{style:{width:x.p+'%'}})),h('span',{className:'chip '+(chipCls[x.status]||'')},x.status),h('button',{className:'btn ghost','aria-label':'Remover '+x.file.name,onClick:()=>setFiles(v=>v.filter((_,k)=>k!==i)),disabled:busy},svg(I.x)))),h('div',{className:'qbar'},h('button',{className:'btn ghost',onClick:()=>{setFiles([]);setSets({});setActive('');setLog('Aguardando arquivos...')},disabled:busy},'Limpar tudo'),h('button',{className:'btn pri lg',onClick:process,disabled:busy||!files.length},busy?'Convertendo...':(stage===3?'Converter novamente':'Converter '+files.length+(files.length>1?' arquivos':' arquivo'))))):null;
- let results=null;
- if(sheet){const metrics=getMetrics(),hasF=query||Object.values(filters).some(Boolean);
-  const rail=h('nav',{className:'panel rail','aria-label':'Relatórios'},h('div',{className:'rail-t'},'Relatórios convertidos'),Object.entries(sets).map(([k,v])=>h('button',{key:k,className:'ri'+(active===k?' on':''),onClick:()=>choose(k)},h('span',null,TYPES[v.type].name),h('em',null,br(v.rows.length)),h('small',null,v.name))));
-  const header=h('thead',null,h('tr',null,dcols.map(c=>h('th',{key:c,className:sort.col===c?'on':'',onClick:()=>order(c),title:'Clique para ordenar'},c+(sort.col===c?(sort.dir===1?' ▲':' ▼'):'')))),showF?h('tr',{className:'frow'},dcols.map(c=>h('th',{key:c},h('input',{placeholder:'Filtrar...',value:filters[c]||'',onClick:e=>e.stopPropagation(),onChange:e=>setFilters(v=>({...v,[c]:e.target.value}))})))):null);
-  const body=h('tbody',null,visible.length?visible.map((r,i)=>h('tr',{key:i},dcols.map(c=>h('td',{key:c,className:typeof r[c]==='number'?'num':'',contentEditable:true,suppressContentEditableWarning:true,title:String(r[c]??''),onBlur:e=>{r[c]=e.currentTarget.textContent}},String(r[c]??''))))):h('tr',null,h('td',{className:'empty',colSpan:dcols.length},'Nenhum registro encontrado. Ajuste a pesquisa ou limpe os filtros.')));
-  results=h('div',{className:'res'},rail,h('div',{className:'main'},
-   h('section',{className:'panel kpis'},metrics.map((m,i)=>h('div',{className:'kpi'+(m[3]?' hi':''),key:i},h('div',{className:'l'},m[0]),h('div',{className:'v'},m[1]),h('div',{className:'n'},m[2])))),
-   h('section',{className:'panel'},h('div',{className:'tools'},h('div',null,h('h2',null,TYPES[sheet.type].name),h('div',{className:'count'},'Exibindo '+br(visible.length)+' de '+br(sheet.rows.length)+' registros')),h('div',{className:'grow'}),h('div',{className:'search'},svg(I.search),h('input',{type:'search','aria-label':'Pesquisar',placeholder:'Pesquisar em todas as colunas',value:query,onChange:e=>setQuery(e.target.value)})),h('div',{className:'seg'},h('button',{className:showF?'on':'',onClick:()=>setShowF(v=>!v)},'Filtros'),h('button',{className:showRaw?'on':'',onClick:()=>setShowRaw(v=>!v)},'Texto original')),h('button',{className:'btn ghost',onClick:()=>{setQuery('');setFilters({})},disabled:!hasF},'Limpar')),
-    h('div',{className:'tbl'},h('table',null,header,body)),
-    h('div',{className:'tip'},'Clique no título da coluna para ordenar. Clique em uma célula para corrigir o valor antes de exportar.'))))}
- return h(React.Fragment,null,top,h('main',{className:'wrap'},stage===1?h('div',{className:'hero'},h('h1',null,'Transforme relatórios em PDF em planilhas Excel'),h('p',null,'Adicione os PDFs, converta e confira os dados antes de exportar.')):null,dropzone,queue,issues.length?h('div',{className:'warn'},issues.join(' ')):null,results,h('section',{className:'panel'},h('details',null,h('summary',null,'Log de processamento'),h('div',{className:'log'},log)))),toast?h('div',{className:'toast',role:'status'},svg(I.check),toast):null)}
-ReactDOM.createRoot(document.getElementById('root')).render(h(App));
-</script></body></html>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>XML → Excel Converter | Modern</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        :root {
+            --primary: #6C63FF;
+            --primary-dark: #5A52D3;
+            --secondary: #FF6584;
+            --accent: #36D1DC;
+            --dark: #1A1A2E;
+            --light: #F8F9FA;
+            --success: #00C896;
+            --gradient: linear-gradient(135deg, var(--primary) 0%, var(--accent) 100%);
+            --gradient-secondary: linear-gradient(135deg, var(--secondary) 0%, #FF9A9E 100%);
+        }
+
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background: var(--dark);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: var(--light);
+            overflow-x: hidden;
+        }
+
+        body::before {
+            content: '';
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: 
+                radial-gradient(circle at 20% 80%, rgba(108, 99, 255, 0.15) 0%, transparent 50%),
+                radial-gradient(circle at 80% 20%, rgba(255, 101, 132, 0.1) 0%, transparent 50%);
+            z-index: -1;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 900px;
+            background: rgba(26, 26, 46, 0.8);
+            backdrop-filter: blur(10px);
+            border-radius: 24px;
+            box-shadow: 
+                0 20px 60px rgba(0, 0, 0, 0.5),
+                0 0 0 1px rgba(108, 99, 255, 0.1);
+            overflow: hidden;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            animation: containerAppear 0.8s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        @keyframes containerAppear {
+            0% { opacity: 0; transform: translateY(30px) scale(0.95); }
+            100% { opacity: 1; transform: translateY(0) scale(1); }
+        }
+
+        .header {
+            background: var(--gradient);
+            padding: 50px 40px;
+            text-align: center;
+            position: relative;
+            overflow: hidden;
+        }
+
+        .header::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: url("data:image/svg+xml,%3Csvg width='60' height='60' viewBox='0 0 60 60' xmlns='http://www.w3.org/2000/svg'%3E%3Cg fill='none' fill-rule='evenodd'%3E%3Cg fill='%23ffffff' fill-opacity='0.05'%3E%3Cpath d='M36 34v-4h-2v4h-4v2h4v4h2v-4h4v-2h-4zm0-30V0h-2v4h-4v2h4v4h2V6h4V4h-4zM6 34v-4H4v4H0v2h4v4h2v-4h4v-2H6zM6 4V0H4v4H0v2h4v4h2V6h4V4H6z'/%3E%3C/g%3E%3C/g%3E%3C/svg%3E");
+            opacity: 0.2;
+        }
+
+        .header-content {
+            position: relative;
+            z-index: 2;
+        }
+
+        .logo {
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+
+        .logo-icon {
+            background: rgba(255, 255, 255, 0.2);
+            width: 70px;
+            height: 70px;
+            border-radius: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            margin-right: 15px;
+            backdrop-filter: blur(5px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .logo-icon i {
+            font-size: 32px;
+            color: white;
+        }
+
+        .logo-text h1 {
+            font-size: 2.8rem;
+            font-weight: 800;
+            background: linear-gradient(to right, #fff 0%, rgba(255, 255, 255, 0.9) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+
+        .logo-text p {
+            font-size: 1.1rem;
+            opacity: 0.9;
+            font-weight: 300;
+            margin-top: 5px;
+        }
+
+        .content {
+            padding: 50px;
+        }
+
+        .upload-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 20px;
+            padding: 40px;
+            border: 2px dashed rgba(108, 99, 255, 0.3);
+            transition: all 0.4s;
+            margin-bottom: 30px;
+        }
+
+        .upload-card.active {
+            border-color: var(--primary);
+            background: rgba(108, 99, 255, 0.05);
+            transform: translateY(-5px);
+            box-shadow: 0 15px 30px rgba(108, 99, 255, 0.1);
+        }
+
+        .upload-label {
+            display: block;
+            font-size: 1.3rem;
+            margin-bottom: 25px;
+            color: var(--light);
+            text-align: center;
+            font-weight: 500;
+        }
+
+        .file-input-wrapper {
+            position: relative;
+            margin-bottom: 30px;
+        }
+
+        .file-input {
+            width: 100%;
+            height: 60px;
+            background: rgba(255, 255, 255, 0.05);
+            border: 2px solid rgba(255, 255, 255, 0.1);
+            border-radius: 15px;
+            padding: 0 20px;
+            font-size: 1rem;
+            color: var(--light);
+            transition: all 0.3s;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .file-input:hover {
+            border-color: var(--primary);
+            background: rgba(108, 99, 255, 0.05);
+        }
+
+        .file-input::file-selector-button {
+            background: var(--gradient);
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 10px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            margin-right: 15px;
+        }
+
+        .file-input::file-selector-button:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 5px 15px rgba(108, 99, 255, 0.4);
+        }
+
+        .file-counter {
+            background: var(--gradient-secondary);
+            color: white;
+            padding: 8px 18px;
+            border-radius: 50px;
+            font-weight: 600;
+            font-size: 0.9rem;
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 15px;
+        }
+
+        .progress-section {
+            margin: 30px 0;
+            display: none;
+        }
+
+        .progress-header {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 10px;
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .progress-bar {
+            height: 12px;
+            background: rgba(255, 255, 255, 0.05);
+            border-radius: 10px;
+            overflow: hidden;
+            position: relative;
+        }
+
+        .progress-fill {
+            height: 100%;
+            background: var(--gradient);
+            border-radius: 10px;
+            width: 0%;
+            transition: width 0.5s cubic-bezier(0.34, 1.56, 0.64, 1);
+            position: relative;
+            overflow: hidden;
+        }
+
+        .progress-fill::after {
+            content: '';
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: linear-gradient(90deg, 
+                transparent 0%, 
+                rgba(255, 255, 255, 0.3) 50%, 
+                transparent 100%);
+            animation: shimmer 2s infinite;
+        }
+
+        @keyframes shimmer {
+            0% { transform: translateX(-100%); }
+            100% { transform: translateX(100%); }
+        }
+
+        .action-buttons {
+            display: flex;
+            gap: 20px;
+            justify-content: center;
+            margin-top: 30px;
+        }
+
+        .btn {
+            padding: 18px 40px;
+            border: none;
+            border-radius: 15px;
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: all 0.3s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            min-width: 200px;
+        }
+
+        .btn-primary {
+            background: var(--gradient);
+            color: white;
+            box-shadow: 0 8px 25px rgba(108, 99, 255, 0.3);
+        }
+
+        .btn-primary:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(108, 99, 255, 0.4);
+        }
+
+        .btn-primary:active {
+            transform: translateY(-2px);
+        }
+
+        .btn-primary:disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+
+        .btn-secondary {
+            background: rgba(255, 255, 255, 0.05);
+            color: white;
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .btn-secondary:hover {
+            background: rgba(255, 255, 255, 0.1);
+            transform: translateY(-3px);
+        }
+
+        .result-section {
+            background: rgba(0, 200, 150, 0.05);
+            border-radius: 20px;
+            padding: 30px;
+            margin-top: 30px;
+            border: 1px solid rgba(0, 200, 150, 0.2);
+            display: none;
+            animation: slideUp 0.5s cubic-bezier(0.23, 1, 0.32, 1);
+        }
+
+        @keyframes slideUp {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .result-header {
+            display: flex;
+            align-items: center;
+            gap: 15px;
+            margin-bottom: 20px;
+        }
+
+        .result-icon {
+            width: 50px;
+            height: 50px;
+            background: var(--success);
+            border-radius: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .result-icon i {
+            font-size: 24px;
+            color: white;
+        }
+
+        .result-content h3 {
+            font-size: 1.5rem;
+            font-weight: 600;
+            color: var(--success);
+            margin-bottom: 5px;
+        }
+
+        .result-content p {
+            color: rgba(255, 255, 255, 0.7);
+            font-size: 1rem;
+        }
+
+        .download-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 15px;
+            background: var(--gradient-secondary);
+            color: white;
+            text-decoration: none;
+            padding: 18px 35px;
+            border-radius: 15px;
+            font-weight: 600;
+            font-size: 1.1rem;
+            transition: all 0.3s;
+            box-shadow: 0 8px 25px rgba(255, 101, 132, 0.3);
+            margin-top: 15px;
+        }
+
+        .download-btn:hover {
+            transform: translateY(-5px);
+            box-shadow: 0 15px 35px rgba(255, 101, 132, 0.4);
+        }
+
+        .stats {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(150px, 1fr));
+            gap: 20px;
+            margin-top: 30px;
+        }
+
+        .stat-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 15px;
+            padding: 20px;
+            text-align: center;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        .stat-value {
+            font-size: 2rem;
+            font-weight: 700;
+            background: var(--gradient);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 5px;
+        }
+
+        .stat-label {
+            font-size: 0.9rem;
+            color: rgba(255, 255, 255, 0.6);
+        }
+
+        .footer {
+            text-align: center;
+            padding: 30px;
+            color: rgba(255, 255, 255, 0.5);
+            font-size: 0.9rem;
+            border-top: 1px solid rgba(255, 255, 255, 0.05);
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                max-width: 95%;
+            }
+            
+            .content {
+                padding: 30px 20px;
+            }
+            
+            .upload-card {
+                padding: 25px;
+            }
+            
+            .logo {
+                flex-direction: column;
+                text-align: center;
+            }
+            
+            .logo-icon {
+                margin-right: 0;
+                margin-bottom: 15px;
+            }
+            
+            .action-buttons {
+                flex-direction: column;
+            }
+            
+            .btn {
+                width: 100%;
+            }
+            
+            .header {
+                padding: 40px 20px;
+            }
+            
+            .logo-text h1 {
+                font-size: 2.2rem;
+            }
+        }
+    </style>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/xlsx/0.17.0/xlsx.full.min.js"></script>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="header-content">
+                <div class="logo">
+                    <div class="logo-icon">
+                        <i class="fas fa-file-code"></i>
+                    </div>
+                    <div class="logo-text">
+                        <h1>XML → EXCEL CONVERTER</h1>
+                        <p>Transforme seus arquivos XML em planilhas Excel automaticamente</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="content">
+            <div class="upload-card" id="upload-card">
+                <label for="xml-files" class="upload-label">
+                    <i class="fas fa-file-import"></i> ARRASTE E SOLTE OU CLIQUE PARA SELECIONAR
+                </label>
+                
+                <div class="file-input-wrapper">
+                    <input type="file" id="xml-files" name="xml_files" multiple accept=".xml" class="file-input">
+                </div>
+                
+                <div id="file-counter" style="text-align: center;">
+                    <span class="file-counter">
+                        <i class="fas fa-file"></i> <span id="file-count">0</span> arquivo(s) selecionado(s)
+                    </span>
+                </div>
+                
+                <div class="progress-section" id="progress-section">
+                    <div class="progress-header">
+                        <span id="progress-text">Processando...</span>
+                        <span id="progress-percent">0%</span>
+                    </div>
+                    <div class="progress-bar">
+                        <div class="progress-fill" id="progress-fill"></div>
+                    </div>
+                </div>
+                
+                <div class="action-buttons">
+                    <button type="button" id="process-btn" class="btn btn-primary">
+                        <i class="fas fa-play-circle"></i> CONVERTER AGORA
+                    </button>
+                    <button type="button" id="reset-btn" class="btn btn-secondary">
+                        <i class="fas fa-redo"></i> LIMPAR TUDO
+                    </button>
+                </div>
+            </div>
+            
+            <div class="result-section" id="result-section">
+                <div class="result-header">
+                    <div class="result-icon">
+                        <i class="fas fa-check"></i>
+                    </div>
+                    <div class="result-content">
+                        <h3>Conversão Concluída!</h3>
+                        <p>Seu arquivo Excel está pronto para download</p>
+                    </div>
+                </div>
+                
+                <a id="download-link" class="download-btn" download="Arquivos XMLs.xlsx">
+                    <i class="fas fa-file-excel"></i> BAIXAR PLANILHA EXCEL
+                    <i class="fas fa-download"></i>
+                </a>
+                
+                <div class="stats">
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-files">0</div>
+                        <div class="stat-label">Arquivos Processados</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-rows">0</div>
+                        <div class="stat-label">Linhas de Dados</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-columns">0</div>
+                        <div class="stat-label">Colunas Geradas</div>
+                    </div>
+                    <div class="stat-card">
+                        <div class="stat-value" id="stat-time">0s</div>
+                        <div class="stat-label">Tempo de Processamento</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="footer">
+            <p>©️ 2025 XML → Excel Converter | Desenvolvido por Logistech </i></p>
+        </div>
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            const fileInput = document.getElementById('xml-files');
+            const fileCount = document.getElementById('file-count');
+            const uploadCard = document.getElementById('upload-card');
+            const processBtn = document.getElementById('process-btn');
+            const resetBtn = document.getElementById('reset-btn');
+            const progressSection = document.getElementById('progress-section');
+            const progressFill = document.getElementById('progress-fill');
+            const progressText = document.getElementById('progress-text');
+            const progressPercent = document.getElementById('progress-percent');
+            const resultSection = document.getElementById('result-section');
+            const downloadLink = document.getElementById('download-link');
+            const statFiles = document.getElementById('stat-files');
+            const statRows = document.getElementById('stat-rows');
+            const statColumns = document.getElementById('stat-columns');
+            const statTime = document.getElementById('stat-time');
+            
+            let files = [];
+            let startTime = 0;
+            
+            // Atualizar contador de arquivos
+            fileInput.addEventListener('change', function() {
+                files = Array.from(this.files);
+                fileCount.textContent = files.length;
+                
+                if (files.length > 0) {
+                    uploadCard.classList.add('active');
+                } else {
+                    uploadCard.classList.remove('active');
+                }
+            });
+            
+            // Arrastar e soltar arquivos
+            uploadCard.addEventListener('dragover', function(e) {
+                e.preventDefault();
+                uploadCard.classList.add('active');
+            });
+            
+            uploadCard.addEventListener('dragleave', function(e) {
+                if (!uploadCard.contains(e.relatedTarget)) {
+                    uploadCard.classList.remove('active');
+                }
+            });
+            
+            uploadCard.addEventListener('drop', function(e) {
+                e.preventDefault();
+                uploadCard.classList.remove('active');
+                
+                if (e.dataTransfer.files.length) {
+                    fileInput.files = e.dataTransfer.files;
+                    files = Array.from(e.dataTransfer.files);
+                    fileCount.textContent = files.length;
+                    uploadCard.classList.add('active');
+                }
+            });
+            
+            // Botão de processar
+            processBtn.addEventListener('click', async function() {
+                if (files.length === 0) {
+                    showNotification('Selecione pelo menos um arquivo XML para converter', 'warning');
+                    return;
+                }
+                
+                // Iniciar processamento
+                startTime = Date.now();
+                progressSection.style.display = 'block';
+                resultSection.style.display = 'none';
+                processBtn.disabled = true;
+                processBtn.innerHTML = '<i class="fas fa-spinner fa-spin"></i> CONVERTENDO...';
+                
+                // Atualizar barra de progresso
+                updateProgress(10, 'Analisando arquivos...');
+                
+                try {
+                    const result = await processXMLFiles(files);
+                    
+                    // Atualizar estatísticas
+                    statFiles.textContent = files.length;
+                    statRows.textContent = result.rowCount;
+                    statColumns.textContent = result.columnCount;
+                    
+                    const timeElapsed = ((Date.now() - startTime) / 1000).toFixed(1);
+                    statTime.textContent = `${timeElapsed}s`;
+                    
+                    // Mostrar resultado
+                    updateProgress(100, 'Conversão concluída!');
+                    setTimeout(() => {
+                        progressSection.style.display = 'none';
+                        resultSection.style.display = 'block';
+                        processBtn.disabled = false;
+                        processBtn.innerHTML = '<i class="fas fa-play-circle"></i> CONVERTER AGORA';
+                        
+                        // Rolar para resultado
+                        resultSection.scrollIntoView({ behavior: 'smooth' });
+                    }, 500);
+                    
+                } catch (error) {
+                    showNotification('Erro ao processar arquivos: ' + error.message, 'error');
+                    progressSection.style.display = 'none';
+                    processBtn.disabled = false;
+                    processBtn.innerHTML = '<i class="fas fa-play-circle"></i> CONVERTER AGORA';
+                }
+            });
+            
+            // Botão de reset
+            resetBtn.addEventListener('click', function() {
+                fileInput.value = '';
+                files = [];
+                fileCount.textContent = '0';
+                uploadCard.classList.remove('active');
+                progressSection.style.display = 'none';
+                resultSection.style.display = 'none';
+                processBtn.disabled = false;
+                processBtn.innerHTML = '<i class="fas fa-play-circle"></i> CONVERTER AGORA';
+                showNotification('Todos os dados foram resetados', 'info');
+            });
+            
+            // Função para atualizar barra de progresso
+            function updateProgress(percent, text) {
+                progressFill.style.width = `${percent}%`;
+                progressPercent.textContent = `${percent}%`;
+                progressText.textContent = text;
+                
+                // Adicionar efeito de pulso no final
+                if (percent === 100) {
+                    progressFill.style.animation = 'pulse 1s infinite';
+                }
+            }
+            
+            // Função para mostrar notificação
+            function showNotification(message, type) {
+                // Criar elemento de notificação
+                const notification = document.createElement('div');
+                notification.className = `notification ${type}`;
+                notification.innerHTML = `
+                    <i class="fas fa-${type === 'success' ? 'check-circle' : type === 'warning' ? 'exclamation-triangle' : 'info-circle'}"></i>
+                    <span>${message}</span>
+                `;
+                
+                // Estilos da notificação
+                notification.style.cssText = `
+                    position: fixed;
+                    top: 30px;
+                    right: 30px;
+                    background: ${type === 'success' ? 'rgba(0, 200, 150, 0.9)' : type === 'warning' ? 'rgba(255, 193, 7, 0.9)' : 'rgba(255, 101, 132, 0.9)'};
+                    color: white;
+                    padding: 15px 25px;
+                    border-radius: 12px;
+                    display: flex;
+                    align-items: center;
+                    gap: 12px;
+                    z-index: 1000;
+                    box-shadow: 0 10px 30px rgba(0, 0, 0, 0.3);
+                    animation: slideIn 0.3s ease-out;
+                    font-weight: 500;
+                    backdrop-filter: blur(5px);
+                `;
+                
+                document.body.appendChild(notification);
+                
+                // Remover após 4 segundos
+                setTimeout(() => {
+                    notification.style.animation = 'slideOut 0.3s ease-out forwards';
+                    setTimeout(() => {
+                        if (notification.parentNode) {
+                            notification.parentNode.removeChild(notification);
+                        }
+                    }, 300);
+                }, 4000);
+                
+                // Adicionar keyframes para animação
+                if (!document.querySelector('#notification-styles')) {
+                    const style = document.createElement('style');
+                    style.id = 'notification-styles';
+                    style.textContent = `
+                        @keyframes slideIn {
+                            from { transform: translateX(100%); opacity: 0; }
+                            to { transform: translateX(0); opacity: 1; }
+                        }
+                        @keyframes slideOut {
+                            from { transform: translateX(0); opacity: 1; }
+                            to { transform: translateX(100%); opacity: 0; }
+                        }
+                        @keyframes pulse {
+                            0% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0.7); }
+                            70% { box-shadow: 0 0 0 10px rgba(108, 99, 255, 0); }
+                            100% { box-shadow: 0 0 0 0 rgba(108, 99, 255, 0); }
+                        }
+                    `;
+                    document.head.appendChild(style);
+                }
+            }
+            
+            // Processar arquivos XML
+            async function processXMLFiles(files) {
+                let cabecalho = [];
+                let dados = [];
+                let rowCount = 0;
+                let columnCount = 0;
+                
+                updateProgress(20, 'Lendo arquivos XML...');
+                
+                // Processar cada arquivo
+                for (let i = 0; i < files.length; i++) {
+                    const file = files[i];
+                    const result = await readXMLFile(file);
+                    let dadosXML = extractDataElement(result);
+                    
+                    atualizarCabecalho(cabecalho, dadosXML);
+                    dados.push(dadosXML);
+                    rowCount++;
+                    
+                    // Atualizar progresso
+                    const progress = 20 + (i / files.length * 60);
+                    updateProgress(progress.toFixed(0), `Processando arquivo ${i+1} de ${files.length}...`);
+                    
+                    // Pequeno delay para visualização do progresso
+                    await new Promise(resolve => setTimeout(resolve, 100));
+                }
+                
+                columnCount = cabecalho.length;
+                updateProgress(85, 'Criando planilha Excel...');
+                
+                // Criar planilha Excel
+                let worksheet = XLSX.utils.json_to_sheet(dados, { header: cabecalho });
+                worksheet['!rows'] = [{}, ...dados.map(() => ({ hpt: 15 }))];
+                
+                let workbook = XLSX.utils.book_new();
+                XLSX.utils.book_append_sheet(workbook, worksheet, "Dados XML");
+                
+                // Ajustar largura das colunas
+                var wscols = [];
+                for (var i = 0; i < cabecalho.length; i++) {
+                    wscols.push({ wpx: 150 });
+                }
+                worksheet['!cols'] = wscols;
+                
+                updateProgress(95, 'Gerando arquivo final...');
+                
+                // Escrever arquivo Excel
+                var wopts = { bookType: 'xlsx', bookSST: false, type: 'binary' };
+                var wbout = XLSX.write(workbook, wopts);
+                
+                // Converter para Blob
+                var s2ab = function (s) {
+                    var buf = new ArrayBuffer(s.length);
+                    var view = new Uint8Array(buf);
+                    for (var i = 0; i != s.length; ++i) view[i] = s.charCodeAt(i) & 0xFF;
+                    return buf;
+                };
+                
+                // Criar URL de download
+                var blob = new Blob([s2ab(wbout)], { type: "application/octet-stream" });
+                var url = URL.createObjectURL(blob);
+                downloadLink.href = url;
+                
+                return {
+                    rowCount: dados.length,
+                    columnCount: cabecalho.length
+                };
+            }
+            
+            function readXMLFile(file) {
+                return new Promise((resolve, reject) => {
+                    let reader = new FileReader();
+                    reader.onload = () => {
+                        let parser = new DOMParser();
+                        let xmlDoc = parser.parseFromString(reader.result, "text/xml");
+                        resolve(xmlDoc.documentElement);
+                    };
+                    reader.onerror = reject;
+                    reader.readAsText(file);
+                });
+            }
+            
+            function extractDataElement(element) {
+                let dados = {};
+                Array.from(element.children).forEach(child => {
+                    if (child.children.length > 0) {
+                        Object.assign(dados, extractDataElement(child));
+                    } else {
+                        let tagLimpa = child.tagName.replace(/{.*}/, '');
+                        dados[tagLimpa] = child.textContent;
+                    }
+                });
+                return dados;
+            }
+            
+            function atualizarCabecalho(cabecalho, dadosXML) {
+                Object.keys(dadosXML).forEach(chave => {
+                    if (!cabecalho.includes(chave)) {
+                        cabecalho.push(chave);
+                    }
+                });
+            }
+            
+            // Mostrar mensagem de boas-vindas
+            setTimeout(() => {
+                showNotification('Bem-vindo ao conversor XML → Excel! Arraste seus arquivos para começar.', 'info');
+            }, 1000);
+        });
+    </script>
+</body>
+</html>
